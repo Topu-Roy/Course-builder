@@ -3,9 +3,9 @@
 import { db } from "@/server/db";
 import { generateCourseOutline } from "./ai";
 
-export async function createCourse(topic: string, description: string) {
+export async function createCourse(topic: string, description: string, author: string) {
   // 1. Generate the course outline using AI
-  const courseOutline = await generateCourseOutline(topic, description);
+  const courseOutline = await generateCourseOutline(topic, description, author);
 
   // 2. Save the course to the database
   const course = await db.course.create({

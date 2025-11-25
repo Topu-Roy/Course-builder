@@ -21,9 +21,10 @@ export default function CreateCoursePage() {
     const formData = new FormData(event.currentTarget);
     const topic = formData.get("topic") as string;
     const description = formData.get("description") as string;
+    const author = (formData.get("author") as string) || "Anonymous";
 
     try {
-      const course = await createCourse(topic, description);
+      const course = await createCourse(topic, description, author);
       toast.success("Course created successfully!");
       router.push(`/course/${course.id}`);
     } catch (error) {
@@ -52,6 +53,10 @@ export default function CreateCoursePage() {
                 required
                 disabled={loading}
               />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="author">Author</Label>
+              <Input id="author" name="author" placeholder="Your name" disabled={loading} />
             </div>
             <div className="space-y-2">
               <Label htmlFor="description">Description (Optional)</Label>

@@ -4,14 +4,25 @@ import { generateObject } from "ai";
 import { google } from "@ai-sdk/google";
 import { z } from "zod";
 
-export async function generateCourseOutline(topic: string, description: string) {
+export async function generateCourseOutline(topic: string, description: string, author: string) {
   const schema = z.object({
     courseTitle: z.string(),
     courseDescription: z.string(),
+    author: z.string(),
     chapters: z.array(
       z.object({
         title: z.string(),
-        content: z.string().describe("A brief summary of what this chapter will cover"),
+        description: z.string(),
+        content: z.array(
+          z.object({
+            heading: z.string(),
+            subHeading: z.string(),
+            imageUrl: z.string().optional(),
+            videoUrl: z.string().optional(),
+            text: z.string().optional(),
+            code: z.string().optional(),
+          })
+        ),
       })
     ),
   });
@@ -19,14 +30,17 @@ export async function generateCourseOutline(topic: string, description: string) 
   const prompt = `
     You are an expert course creator. Create a comprehensive course outline for the topic: "${topic}".
     
+    Author: ${author}.
     Additional context/description: ${description}
     
     The course should have 5-10 chapters. Each chapter should have a title and a brief summary of the content.
-    Ensure the chapters follow a logical progression.
+    For each chapter, provide detailed content including headings, subheadings, and explanatory text.
+    Where appropriate, include code snippets or placeholders for images/videos.
+    Ensure the chapters follow a logical progression and the content is educational and engaging.
   `;
 
   const { object } = await generateObject({
-    model: google("gemini-1.5-flash"),
+    model: google("gemini-2.5-flash"),
     schema: schema,
     prompt: prompt,
   });

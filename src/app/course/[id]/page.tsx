@@ -4,6 +4,15 @@ import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { CheckCircle, Circle } from "lucide-react";
 
+interface ContentSection {
+  heading?: string;
+  subHeading?: string;
+  text?: string;
+  code?: string;
+  imageUrl?: string;
+  videoUrl?: string;
+}
+
 export default async function CoursePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const course = await db.course.findUnique({
@@ -47,7 +56,13 @@ export default async function CoursePage({ params }: { params: Promise<{ id: str
                   )}
                 </CardHeader>
                 <CardContent>
-                  <p className="text-sm text-muted-foreground line-clamp-2">{chapter.content}</p>
+                  <p className="text-sm text-muted-foreground line-clamp-2">
+                    {Array.isArray(chapter.content) && chapter.content.length > 0
+                      ? (chapter.content as ContentSection[])[0]?.text ||
+                        (chapter.content as ContentSection[])[0]?.subHeading ||
+                        "Click to view chapter content"
+                      : "Click to view chapter content"}
+                  </p>
                 </CardContent>
               </Card>
             </Link>

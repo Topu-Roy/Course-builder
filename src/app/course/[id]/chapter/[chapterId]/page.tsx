@@ -1,9 +1,19 @@
 import { db } from "@/server/db";
 import { notFound } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { revalidatePath } from "next/cache";
+
+interface ContentSection {
+  heading?: string;
+  subHeading?: string;
+  imageUrl?: string;
+  videoUrl?: string;
+  text?: string;
+  code?: string;
+}
 
 export default async function ChapterPage({
   params,
@@ -87,8 +97,36 @@ export default async function ChapterPage({
       </div>
 
       <div className="prose dark:prose-invert max-w-none mb-10">
-        <p>{chapter.content}</p>
-        {/* In a real app, we would render markdown or rich text here */}
+        {Array.isArray(chapter.content) &&
+          (chapter.content as ContentSection[]).map((section, index) => (
+            <div key={index} className="mb-8">
+              {section.heading && <h2 className="text-2xl font-bold mb-2">{section.heading}</h2>}
+              {section.subHeading && (
+                <h3 className="text-xl font-semibold mb-3 text-muted-foreground">{section.subHeading}</h3>
+              )}
+              {section.text && <p className="mb-4 leading-relaxed">{section.text}</p>}
+              {section.code && (
+                <pre className="bg-muted p-4 rounded-lg overflow-x-auto mb-4">
+                  <code>{section.code}</code>
+                </pre>
+              )}
+              {section.imageUrl && (
+                <div className="relative w-full h-96 my-4">
+                  <Image
+                    src={section.imageUrl}
+                    alt={section.heading || "Content image"}
+                    fill
+                    className="rounded-lg object-cover"
+                  />
+                </div>
+              )}
+              {section.videoUrl && (
+                <div className="aspect-video my-4">
+                  <iframe src={section.videoUrl} className="w-full h-full rounded-lg" allowFullScreen />
+                </div>
+              )}
+            </div>
+          ))}
       </div>
 
       <div className="flex items-center justify-between border-t pt-6">
