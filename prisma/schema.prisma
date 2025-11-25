@@ -30,7 +30,7 @@ model Chapter {
 
 model UserProgress {
   id        String   @id @default(cuid())
-  userId    String // For now, we'll just use a simple string, maybe from a cookie or local storage if no auth
+  userId    String
   chapterId String
   chapter   Chapter  @relation(fields: [chapterId], references: [id], onDelete: Cascade)
   completed Boolean  @default(false)
