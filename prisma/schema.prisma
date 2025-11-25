@@ -17,15 +17,14 @@ model Course {
 }
 
 model Chapter {
-  id        String   @id @default(cuid())
-  title     String
-  content   Json
-  order     Int
-  courseId  String
-  course    Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
+  id           String         @id @default(cuid())
+  title        String
+  content      Json
+  order        Int
+  courseId     String
+  course       Course         @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
   userProgress UserProgress[]
 }
 

@@ -5,6 +5,8 @@ import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { revalidatePath } from "next/cache";
+import { CodeBlock } from "@/components/ui/code-block";
+import { YouTubeEmbed } from "@/components/ui/youtube-embed";
 
 interface ContentSection {
   heading?: string;
@@ -106,9 +108,9 @@ export default async function ChapterPage({
               )}
               {section.text && <p className="mb-4 leading-relaxed">{section.text}</p>}
               {section.code && (
-                <pre className="bg-muted p-4 rounded-lg overflow-x-auto mb-4">
-                  <code>{section.code}</code>
-                </pre>
+                <div className="mb-4">
+                  <CodeBlock code={section.code} language="typescript" />
+                </div>
               )}
               {section.imageUrl && (
                 <div className="relative w-full h-96 my-4">
@@ -120,11 +122,7 @@ export default async function ChapterPage({
                   />
                 </div>
               )}
-              {section.videoUrl && (
-                <div className="aspect-video my-4">
-                  <iframe src={section.videoUrl} className="w-full h-full rounded-lg" allowFullScreen />
-                </div>
-              )}
+              {section.videoUrl && <YouTubeEmbed url={section.videoUrl} />}
             </div>
           ))}
       </div>
