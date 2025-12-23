@@ -130,13 +130,26 @@ export const ChapterContentEditor = ({
               </div>
 
               <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
+                <div className="space-y-2 relative">
                   <Label>Video URL (YouTube)</Label>
-                  <Input
-                    value={section.videoUrl || ""}
-                    onChange={(e) => handleSectionChange(index, "videoUrl", e.target.value)}
-                    placeholder="https://youtube.com/..."
-                  />
+                  <div className="relative">
+                    <Input
+                      value={section.videoUrl || ""}
+                      onChange={(e) => handleSectionChange(index, "videoUrl", e.target.value)}
+                      placeholder="https://youtube.com/..."
+                      className="pr-8"
+                    />
+                    {section.videoUrl && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="absolute right-1 top-1 h-7 w-7 p-0 text-muted-foreground hover:text-destructive"
+                        onClick={() => handleSectionChange(index, "videoUrl", "")}
+                      >
+                        <Trash className="h-3 w-3" />
+                      </Button>
+                    )}
+                  </div>
                 </div>
                 <div className="space-y-2">
                   <Label>Image URL</Label>
@@ -149,7 +162,20 @@ export const ChapterContentEditor = ({
               </div>
 
               <div className="space-y-2">
-                <Label>Code Block</Label>
+                <div className="flex items-center justify-between">
+                  <Label>Code Block</Label>
+                  {section.code && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-6 px-2 text-xs text-muted-foreground hover:text-destructive"
+                      onClick={() => handleSectionChange(index, "code", "")}
+                    >
+                      <Trash className="h-3 w-3 mr-1" />
+                      Clear Code
+                    </Button>
+                  )}
+                </div>
                 <Textarea
                   value={section.code || ""}
                   onChange={(e) => handleSectionChange(index, "code", e.target.value)}
