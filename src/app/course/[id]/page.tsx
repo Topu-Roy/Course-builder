@@ -3,15 +3,9 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { CheckCircle, Circle } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
-interface ContentSection {
-  heading?: string;
-  subHeading?: string;
-  text?: string;
-  code?: string;
-  imageUrl?: string;
-  videoUrl?: string;
-}
+import { ContentSection } from "@/lib/types";
 
 export default async function CoursePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -35,9 +29,14 @@ export default async function CoursePage({ params }: { params: Promise<{ id: str
 
   return (
     <div className="container mx-auto py-10 max-w-4xl">
-      <div className="mb-8">
-        <h1 className="text-4xl font-bold mb-4">{course.title}</h1>
-        <p className="text-lg text-muted-foreground">{course.description}</p>
+      <div className="mb-8 flex items-center justify-between">
+        <div>
+          <h1 className="text-4xl font-bold mb-4">{course.title}</h1>
+          <p className="text-lg text-muted-foreground">{course.description}</p>
+        </div>
+        <Link href={`/course/${course.id}/edit`}>
+          <Button variant="outline">Edit Course</Button>
+        </Link>
       </div>
 
       <div className="grid gap-4">
