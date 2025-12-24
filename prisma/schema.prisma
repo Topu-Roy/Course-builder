@@ -8,14 +8,31 @@ datasource db {
 }
 
 model Course {
-  id          String    @id @default(cuid())
+  id          String         @id @default(cuid())
   title       String
   description String
-  author      String    @default("Anonymous")
-  topic       String    @default("")
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  author      String         @default("Anonymous")
+  topic       String         @default("")
+  category    CourseCategory
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
   chapters    Chapter[]
+}
+
+enum CourseCategory {
+  TECHNOLOGY
+  BUSINESS
+  FINANCE
+  MARKETING
+  DESIGN
+  ART
+  SCIENCE
+  ACADEMIC
+  HEALTH
+  FITNESS
+  MUSIC
+  LIFESTYLE
+  OTHER
 }
 
 model Chapter {

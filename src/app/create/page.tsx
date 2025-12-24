@@ -9,6 +9,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
 import { createCourse } from "@/server/actions/course";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { CourseCategory } from "@/generated/prisma/client";
 
 export default function CreateCoursePage() {
   const router = useRouter();
@@ -22,9 +24,10 @@ export default function CreateCoursePage() {
     const topic = formData.get("topic") as string;
     const description = formData.get("description") as string;
     const author = (formData.get("author") as string) || "Anonymous";
+    const category = formData.get("category") as CourseCategory;
 
     try {
-      const course = await createCourse(topic, description, author);
+      const course = await createCourse(topic, description, author, category);
       toast.success("Course created successfully!");
       router.push(`/course/${course.id}`);
     } catch (error) {
@@ -57,6 +60,22 @@ export default function CreateCoursePage() {
             <div className="space-y-2">
               <Label htmlFor="author">Author</Label>
               <Input id="author" name="author" placeholder="Your name" disabled={loading} />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="category">Category</Label>
+              <Select name="category" required defaultValue={CourseCategory.OTHER}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select a category" />
+                </SelectTrigger>
+                <SelectContent>
+                  {Object.values(CourseCategory).map((category) => (
+                    <SelectItem key={category} value={category}>
+                      {category.charAt(0) + category.slice(1).toLowerCase()}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
             <div className="space-y-2">
               <Label htmlFor="description">Description (Optional)</Label>

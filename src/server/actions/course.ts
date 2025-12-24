@@ -4,7 +4,14 @@ import { db } from "@/server/db";
 import { generateCourseOutline } from "./ai";
 import { searchYouTubeVideo } from "@/server/lib/youtube";
 
-export async function createCourse(topic: string, description: string, author: string) {
+import { CourseCategory } from "@/generated/prisma/client";
+
+export async function createCourse(
+  topic: string,
+  description: string,
+  author: string,
+  category: CourseCategory
+) {
   // 1. Generate the course outline using AI
   const courseOutline = await generateCourseOutline(topic, description, author);
 
@@ -46,6 +53,7 @@ export async function createCourse(topic: string, description: string, author: s
       description: courseOutline.courseDescription,
       author: author,
       topic: topic,
+      category: category,
       chapters: {
         create: enrichedChapters.map((chapter, index) => ({
           title: chapter.title,
