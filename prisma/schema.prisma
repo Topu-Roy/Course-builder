@@ -11,6 +11,8 @@ model Course {
   id          String    @id @default(cuid())
   title       String
   description String
+  author      String    @default("Anonymous")
+  topic       String    @default("")
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
   chapters    Chapter[]

@@ -44,6 +44,8 @@ export async function createCourse(topic: string, description: string, author: s
     data: {
       title: courseOutline.courseTitle,
       description: courseOutline.courseDescription,
+      author: author,
+      topic: topic,
       chapters: {
         create: enrichedChapters.map((chapter, index) => ({
           title: chapter.title,
