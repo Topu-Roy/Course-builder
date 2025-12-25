@@ -10,7 +10,23 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { toast } from "sonner";
 import { createCourse } from "@/server/actions/course";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { CourseCategory } from "@/generated/prisma/client";
+import { type CourseCategory } from "@/generated/prisma/client";
+
+const COURSE_CATEGORIES = [
+  "TECHNOLOGY",
+  "BUSINESS",
+  "FINANCE",
+  "MARKETING",
+  "DESIGN",
+  "ART",
+  "SCIENCE",
+  "ACADEMIC",
+  "HEALTH",
+  "FITNESS",
+  "MUSIC",
+  "LIFESTYLE",
+  "OTHER",
+] satisfies CourseCategory[];
 
 export default function CreateCoursePage() {
   const router = useRouter();
@@ -64,12 +80,12 @@ export default function CreateCoursePage() {
 
             <div className="space-y-2">
               <Label htmlFor="category">Category</Label>
-              <Select name="category" required defaultValue={CourseCategory.OTHER}>
+              <Select name="category" required>
                 <SelectTrigger>
                   <SelectValue placeholder="Select a category" />
                 </SelectTrigger>
                 <SelectContent>
-                  {Object.values(CourseCategory).map((category) => (
+                  {COURSE_CATEGORIES.map((category) => (
                     <SelectItem key={category} value={category}>
                       {category.charAt(0) + category.slice(1).toLowerCase()}
                     </SelectItem>

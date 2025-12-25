@@ -1,8 +1,24 @@
 "use client";
 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { CourseCategory } from "@/generated/prisma/client";
+import { type CourseCategory } from "@/generated/prisma/client";
 import { useRouter, useSearchParams } from "next/navigation";
+
+export const COURSE_CATEGORIES = [
+  "TECHNOLOGY",
+  "BUSINESS",
+  "FINANCE",
+  "MARKETING",
+  "DESIGN",
+  "ART",
+  "SCIENCE",
+  "ACADEMIC",
+  "HEALTH",
+  "FITNESS",
+  "MUSIC",
+  "LIFESTYLE",
+  "OTHER",
+] satisfies CourseCategory[];
 
 export const CourseFilter = () => {
   const router = useRouter();
@@ -27,7 +43,7 @@ export const CourseFilter = () => {
         </SelectTrigger>
         <SelectContent>
           <SelectItem value="ALL">All Categories</SelectItem>
-          {Object.values(CourseCategory).map((category) => (
+          {COURSE_CATEGORIES.map((category) => (
             <SelectItem key={category} value={category}>
               {category.charAt(0) + category.slice(1).toLowerCase()}
             </SelectItem>
