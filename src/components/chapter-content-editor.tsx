@@ -31,7 +31,7 @@ export const ChapterContentEditor = ({
   );
   const [isPending, startTransition] = useTransition();
 
-  const handleSectionChange = (index: number, field: keyof ContentSection, value: string) => {
+  const handleSectionChange = (index: number, field: keyof ContentSection, value: string | undefined) => {
     const newSections = [...sections];
     newSections[index] = { ...newSections[index], [field]: value };
     setSections(newSections);
@@ -129,59 +129,110 @@ export const ChapterContentEditor = ({
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2 relative">
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
                   <Label>Video URL (YouTube)</Label>
-                  <div className="relative">
-                    <Input
-                      value={section.videoUrl || ""}
-                      onChange={(e) => handleSectionChange(index, "videoUrl", e.target.value)}
-                      placeholder="https://youtube.com/..."
-                      className="pr-8"
-                    />
-                    {section.videoUrl && (
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="absolute right-1 top-1 h-7 w-7 p-0 text-muted-foreground hover:text-destructive"
-                        onClick={() => handleSectionChange(index, "videoUrl", "")}
-                      >
-                        <Trash className="h-3 w-3" />
-                      </Button>
-                    )}
-                  </div>
+                  {section.videoUrl !== undefined && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-6 px-2 text-xs text-muted-foreground hover:text-destructive"
+                      onClick={() => handleSectionChange(index, "videoUrl", undefined)}
+                    >
+                      <Trash className="h-3 w-3 mr-1" />
+                      Remove Video
+                    </Button>
+                  )}
                 </div>
-                <div className="space-y-2">
+                {section.videoUrl !== undefined ? (
+                  <Input
+                    value={section.videoUrl || ""}
+                    onChange={(e) => handleSectionChange(index, "videoUrl", e.target.value)}
+                    placeholder="https://youtube.com/..."
+                    autoFocus
+                  />
+                ) : (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="w-full border-dashed text-muted-foreground"
+                    onClick={() => handleSectionChange(index, "videoUrl", "")}
+                  >
+                    <Plus className="mr-2 h-4 w-4" />
+                    Add Video
+                  </Button>
+                )}
+              </div>
+
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
                   <Label>Image URL</Label>
+                  {section.imageUrl !== undefined && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-6 px-2 text-xs text-muted-foreground hover:text-destructive"
+                      onClick={() => handleSectionChange(index, "imageUrl", undefined)}
+                    >
+                      <Trash className="h-3 w-3 mr-1" />
+                      Remove Image
+                    </Button>
+                  )}
+                </div>
+                {section.imageUrl !== undefined ? (
                   <Input
                     value={section.imageUrl || ""}
                     onChange={(e) => handleSectionChange(index, "imageUrl", e.target.value)}
                     placeholder="https://example.com/image.jpg"
+                    autoFocus
                   />
-                </div>
+                ) : (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="w-full border-dashed text-muted-foreground"
+                    onClick={() => handleSectionChange(index, "imageUrl", "")}
+                  >
+                    <Plus className="mr-2 h-4 w-4" />
+                    Add Image
+                  </Button>
+                )}
               </div>
 
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
                   <Label>Code Block</Label>
-                  {section.code && (
+                  {section.code !== undefined && (
                     <Button
                       variant="ghost"
                       size="sm"
                       className="h-6 px-2 text-xs text-muted-foreground hover:text-destructive"
-                      onClick={() => handleSectionChange(index, "code", "")}
+                      onClick={() => handleSectionChange(index, "code", undefined)}
                     >
                       <Trash className="h-3 w-3 mr-1" />
-                      Clear Code
+                      Remove Code
                     </Button>
                   )}
                 </div>
-                <Textarea
-                  value={section.code || ""}
-                  onChange={(e) => handleSectionChange(index, "code", e.target.value)}
-                  placeholder="Paste code snippet here..."
-                  className="font-mono text-xs"
-                />
+                {section.code !== undefined ? (
+                  <Textarea
+                    value={section.code || ""}
+                    onChange={(e) => handleSectionChange(index, "code", e.target.value)}
+                    placeholder="Paste code snippet here..."
+                    className="font-mono text-xs"
+                    autoFocus
+                  />
+                ) : (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="w-full border-dashed text-muted-foreground"
+                    onClick={() => handleSectionChange(index, "code", "")}
+                  >
+                    <Plus className="mr-2 h-4 w-4" />
+                    Add Code Block
+                  </Button>
+                )}
               </div>
             </div>
           </div>
