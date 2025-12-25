@@ -4,8 +4,16 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { PlusCircle } from "lucide-react";
 
-export default async function Home() {
+import { CourseFilter } from "@/components/course-filter";
+import { CourseCategory } from "@/generated/prisma/client";
+
+export default async function Home({ searchParams }: { searchParams: Promise<{ category?: string }> }) {
+  const { category } = await searchParams;
+
   const courses = await db.course.findMany({
+    where: {
+      category: category ? (category as CourseCategory) : undefined,
+    },
     orderBy: {
       createdAt: "desc",
     },
@@ -18,12 +26,15 @@ export default async function Home() {
     <div className="container mx-auto py-10 max-w-5xl">
       <div className="flex items-center justify-between mb-8">
         <h1 className="text-4xl font-bold">All Courses</h1>
-        <Link href="/create">
-          <Button>
-            <PlusCircle className="mr-2 h-4 w-4" />
-            Create Course
-          </Button>
-        </Link>
+        <div className="flex items-center gap-4">
+          <CourseFilter />
+          <Link href="/create">
+            <Button>
+              <PlusCircle className="mr-2 h-4 w-4" />
+              Create Course
+            </Button>
+          </Link>
+        </div>
       </div>
 
       {courses.length === 0 ? (
