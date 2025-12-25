@@ -7,8 +7,8 @@ import { PlusCircle } from "lucide-react";
 import { CourseFilter } from "@/components/course-filter";
 import { CourseCategory } from "@/generated/prisma/client";
 
-export default async function Home({ searchParams }: { searchParams: Promise<{ category?: string }> }) {
-  const { category } = await searchParams;
+export default async function Home({ pageProps }: { pageProps: PageProps<"/"> }) {
+  const { category } = await pageProps.searchParams;
 
   const courses = await db.course.findMany({
     where: {
