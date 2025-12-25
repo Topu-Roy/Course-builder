@@ -4,7 +4,8 @@ import { db } from "@/server/db";
 import { generateCourseOutline } from "./ai";
 import { searchYouTubeVideo } from "@/server/lib/youtube";
 
-import { CourseCategory } from "@/generated/prisma/client";
+import { CourseCategory, Prisma } from "@/generated/prisma/client";
+import { ContentBlock } from "@/lib/types";
 
 export async function createCourse(
   topic: string,
@@ -18,30 +19,31 @@ export async function createCourse(
   // 2. Enrich content with real YouTube videos
   const enrichedChapters = await Promise.all(
     courseOutline.chapters.map(async (chapter) => {
-      const enrichedContent = await Promise.all(
-        chapter.content.map(async (section) => {
-          // Search for a relevant video if this section doesn't have one
-          if (!section.videoUrl && section.heading) {
-            // Build a more specific search query including subheading for better targeting
-            const searchParts = [topic, section.heading];
-            if (section.subHeading) {
-              searchParts.push(section.subHeading);
-            }
-            const searchQuery = searchParts.join(" ");
-            const videoUrl = await searchYouTubeVideo(searchQuery);
+      const enrichedBlocks: ContentBlock[] = [];
 
-            return {
-              ...section,
-              videoUrl: videoUrl || undefined,
-            };
+      for (const block of chapter.content) {
+        // Add ID to the block
+        enrichedBlocks.push({ ...block, id: crypto.randomUUID() });
+
+        // If it's a heading, try to find a video
+        if (block.type === "heading") {
+          const searchQuery = `${topic} ${block.content}`;
+          const videoUrl = await searchYouTubeVideo(searchQuery);
+
+          if (videoUrl) {
+            enrichedBlocks.push({
+              id: crypto.randomUUID(),
+              type: "video",
+              content: videoUrl,
+              metadata: { caption: `Video related to ${block.content}` },
+            });
           }
-          return section;
-        })
-      );
+        }
+      }
 
       return {
         ...chapter,
-        content: enrichedContent,
+        content: enrichedBlocks,
       };
     })
   );
@@ -57,7 +59,7 @@ export async function createCourse(
       chapters: {
         create: enrichedChapters.map((chapter, index) => ({
           title: chapter.title,
-          content: chapter.content,
+          content: chapter.content as unknown as Prisma.InputJsonValue,
           order: index,
         })),
       },

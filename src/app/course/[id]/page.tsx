@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { CheckCircle, Circle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-import { ContentSection } from "@/lib/types";
+import { ContentBlock } from "@/lib/types";
 
 export default async function CoursePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -57,8 +57,7 @@ export default async function CoursePage({ params }: { params: Promise<{ id: str
                 <CardContent>
                   <p className="text-sm text-muted-foreground line-clamp-2">
                     {Array.isArray(chapter.content) && chapter.content.length > 0
-                      ? (chapter.content as ContentSection[])[0]?.text ||
-                        (chapter.content as ContentSection[])[0]?.subHeading ||
+                      ? (chapter.content as unknown as ContentBlock[])[0]?.content ||
                         "Click to view chapter content"
                       : "Click to view chapter content"}
                   </p>

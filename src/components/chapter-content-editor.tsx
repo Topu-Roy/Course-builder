@@ -5,12 +5,21 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Trash, Plus, Save } from "lucide-react";
+import {
+  Trash,
+  Save,
+  ArrowUp,
+  ArrowDown,
+  Type,
+  Image as ImageIcon,
+  Video,
+  Code,
+  Heading,
+} from "lucide-react";
 import { updateChapter } from "@/server/actions/chapter";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
-
-import { ContentSection } from "@/lib/types";
+import { ContentBlock, BlockType } from "@/lib/types";
 
 interface ChapterContentEditorProps {
   chapterId: string;
@@ -25,25 +34,49 @@ export const ChapterContentEditor = ({
 }: ChapterContentEditorProps) => {
   const router = useRouter();
   const [title, setTitle] = useState(initialTitle);
-  // Ensure content is an array
-  const [sections, setSections] = useState<ContentSection[]>(
-    Array.isArray(initialContent) ? (initialContent as ContentSection[]) : []
+  // Cast initial content to blocks. If old format, it might be empty or broken, assuming reset.
+  const [blocks, setBlocks] = useState<ContentBlock[]>(
+    Array.isArray(initialContent) ? (initialContent as ContentBlock[]) : []
   );
   const [isPending, startTransition] = useTransition();
 
-  const handleSectionChange = (index: number, field: keyof ContentSection, value: string | undefined) => {
-    const newSections = [...sections];
-    newSections[index] = { ...newSections[index], [field]: value };
-    setSections(newSections);
+  const updateBlock = (index: number, content: string) => {
+    const newBlocks = [...blocks];
+    newBlocks[index] = { ...newBlocks[index], content };
+    setBlocks(newBlocks);
   };
 
-  const addSection = () => {
-    setSections([...sections, { heading: "New Section", text: "" }]);
+  const updateMetadata = (index: number, field: string, value: string | number) => {
+    const newBlocks = [...blocks];
+    newBlocks[index] = {
+      ...newBlocks[index],
+      metadata: { ...newBlocks[index].metadata, [field]: value },
+    };
+    setBlocks(newBlocks);
   };
 
-  const removeSection = (index: number) => {
-    const newSections = sections.filter((_, i) => i !== index);
-    setSections(newSections);
+  const addBlock = (type: BlockType) => {
+    const newBlock: ContentBlock = {
+      id: crypto.randomUUID(),
+      type,
+      content: "",
+      metadata: type === "heading" ? { level: 2 } : {},
+    };
+    setBlocks([...blocks, newBlock]);
+  };
+
+  const removeBlock = (index: number) => {
+    setBlocks(blocks.filter((_, i) => i !== index));
+  };
+
+  const moveBlock = (index: number, direction: "up" | "down") => {
+    if (direction === "up" && index === 0) return;
+    if (direction === "down" && index === blocks.length - 1) return;
+
+    const newBlocks = [...blocks];
+    const targetIndex = direction === "up" ? index - 1 : index + 1;
+    [newBlocks[index], newBlocks[targetIndex]] = [newBlocks[targetIndex], newBlocks[index]];
+    setBlocks(newBlocks);
   };
 
   const onSave = () => {
@@ -51,7 +84,7 @@ export const ChapterContentEditor = ({
       try {
         await updateChapter(chapterId, {
           title,
-          content: sections,
+          content: blocks,
         });
         toast.success("Chapter updated successfully");
         router.refresh();
@@ -63,7 +96,7 @@ export const ChapterContentEditor = ({
 
   return (
     <div className="space-y-8">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between sticky top-4 bg-background/95 backdrop-blur z-10 py-4 border-b">
         <h1 className="text-2xl font-bold">Edit Chapter Content</h1>
         <div className="flex gap-2">
           <Button disabled={isPending} onClick={onSave}>
@@ -73,7 +106,7 @@ export const ChapterContentEditor = ({
         </div>
       </div>
 
-      <div className="grid gap-4 p-4 border rounded-lg bg-card text-card-foreground shadow-sm">
+      <div className="grid gap-4 p-4 border rounded-lg bg-card shadow-sm">
         <div className="grid gap-2">
           <Label htmlFor="chapter-title">Chapter Title</Label>
           <Input
@@ -86,161 +119,140 @@ export const ChapterContentEditor = ({
       </div>
 
       <div className="space-y-4">
-        {sections.map((section, index) => (
-          <div key={index} className="border rounded-lg p-6 relative bg-white dark:bg-slate-950">
-            <Button
-              variant="destructive"
-              size="icon"
-              className="absolute top-4 right-4"
-              onClick={() => removeSection(index)}
-            >
-              <Trash className="h-4 w-4" />
-            </Button>
+        {blocks.map((block, index) => (
+          <div
+            key={block.id}
+            className="border rounded-lg p-4 relative bg-white dark:bg-slate-950 group transition-all hover:shadow-md"
+          >
+            {/* Toolbar */}
+            <div className="absolute top-2 right-2 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity bg-background/80 backdrop-blur rounded-md p-1 border">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-6 w-6"
+                disabled={index === 0}
+                onClick={() => moveBlock(index, "up")}
+              >
+                <ArrowUp className="h-3 w-3" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-6 w-6"
+                disabled={index === blocks.length - 1}
+                onClick={() => moveBlock(index, "down")}
+              >
+                <ArrowDown className="h-3 w-3" />
+              </Button>
+              <div className="w-px h-3 bg-border mx-1" />
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-6 w-6 text-destructive hover:bg-destructive/10"
+                onClick={() => removeBlock(index)}
+              >
+                <Trash className="h-3 w-3" />
+              </Button>
+            </div>
 
-            <h3 className="font-semibold mb-4 text-muted-foreground">Section {index + 1}</h3>
-
-            <div className="grid gap-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label>Heading</Label>
-                  <Input
-                    value={section.heading || ""}
-                    onChange={(e) => handleSectionChange(index, "heading", e.target.value)}
-                    placeholder="Section Heading"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>Sub-Heading</Label>
-                  <Input
-                    value={section.subHeading || ""}
-                    onChange={(e) => handleSectionChange(index, "subHeading", e.target.value)}
-                    placeholder="Optional sub-heading"
-                  />
-                </div>
+            <div className="mr-8">
+              {/* Block Type Badge */}
+              <div className="flex items-center gap-2 mb-2">
+                <span className="text-xs font-mono uppercase text-muted-foreground bg-muted px-2 py-0.5 rounded">
+                  {block.type}
+                </span>
               </div>
 
-              <div className="space-y-2">
-                <Label>Text Content</Label>
+              {/* Block Content Renderers */}
+              {block.type === "heading" && (
+                <Input
+                  value={block.content}
+                  onChange={(e) => updateBlock(index, e.target.value)}
+                  className="font-bold text-lg"
+                  placeholder="Heading Text"
+                />
+              )}
+
+              {block.type === "text" && (
                 <Textarea
-                  value={section.text || ""}
-                  onChange={(e) => handleSectionChange(index, "text", e.target.value)}
-                  placeholder="Main text content..."
+                  value={block.content}
+                  onChange={(e) => updateBlock(index, e.target.value)}
+                  placeholder="Type your text content here..."
                   className="min-h-[100px]"
                 />
-              </div>
+              )}
 
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <Label>Video URL (YouTube)</Label>
-                  {section.videoUrl !== undefined && (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="h-6 px-2 text-xs text-muted-foreground hover:text-destructive"
-                      onClick={() => handleSectionChange(index, "videoUrl", undefined)}
-                    >
-                      <Trash className="h-3 w-3 mr-1" />
-                      Remove Video
-                    </Button>
-                  )}
-                </div>
-                {section.videoUrl !== undefined ? (
-                  <Input
-                    value={section.videoUrl || ""}
-                    onChange={(e) => handleSectionChange(index, "videoUrl", e.target.value)}
-                    placeholder="https://youtube.com/..."
-                    autoFocus
-                  />
-                ) : (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="w-full border-dashed text-muted-foreground"
-                    onClick={() => handleSectionChange(index, "videoUrl", "")}
-                  >
-                    <Plus className="mr-2 h-4 w-4" />
-                    Add Video
-                  </Button>
-                )}
-              </div>
-
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <Label>Image URL</Label>
-                  {section.imageUrl !== undefined && (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="h-6 px-2 text-xs text-muted-foreground hover:text-destructive"
-                      onClick={() => handleSectionChange(index, "imageUrl", undefined)}
-                    >
-                      <Trash className="h-3 w-3 mr-1" />
-                      Remove Image
-                    </Button>
-                  )}
-                </div>
-                {section.imageUrl !== undefined ? (
-                  <Input
-                    value={section.imageUrl || ""}
-                    onChange={(e) => handleSectionChange(index, "imageUrl", e.target.value)}
-                    placeholder="https://example.com/image.jpg"
-                    autoFocus
-                  />
-                ) : (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="w-full border-dashed text-muted-foreground"
-                    onClick={() => handleSectionChange(index, "imageUrl", "")}
-                  >
-                    <Plus className="mr-2 h-4 w-4" />
-                    Add Image
-                  </Button>
-                )}
-              </div>
-
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <Label>Code Block</Label>
-                  {section.code !== undefined && (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="h-6 px-2 text-xs text-muted-foreground hover:text-destructive"
-                      onClick={() => handleSectionChange(index, "code", undefined)}
-                    >
-                      <Trash className="h-3 w-3 mr-1" />
-                      Remove Code
-                    </Button>
-                  )}
-                </div>
-                {section.code !== undefined ? (
+              {block.type === "code" && (
+                <div className="space-y-2">
                   <Textarea
-                    value={section.code || ""}
-                    onChange={(e) => handleSectionChange(index, "code", e.target.value)}
-                    placeholder="Paste code snippet here..."
-                    className="font-mono text-xs"
-                    autoFocus
+                    value={block.content}
+                    onChange={(e) => updateBlock(index, e.target.value)}
+                    placeholder="Paste code here..."
+                    className="font-mono text-sm bg-slate-950 text-slate-50 min-h-[150px]"
                   />
-                ) : (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="w-full border-dashed text-muted-foreground"
-                    onClick={() => handleSectionChange(index, "code", "")}
-                  >
-                    <Plus className="mr-2 h-4 w-4" />
-                    Add Code Block
-                  </Button>
-                )}
-              </div>
+                  <div className="flex items-center gap-2">
+                    <Label className="text-xs">Language:</Label>
+                    <Input
+                      value={block.metadata?.language || ""}
+                      onChange={(e) => updateMetadata(index, "language", e.target.value)}
+                      placeholder="e.g. typescript"
+                      className="h-6 w-32 text-xs"
+                    />
+                  </div>
+                </div>
+              )}
+
+              {block.type === "image" && (
+                <div className="space-y-2">
+                  <Input
+                    value={block.content}
+                    onChange={(e) => updateBlock(index, e.target.value)}
+                    placeholder="Image URL (https://...)"
+                  />
+                  {block.content && (
+                    <div className="relative aspect-video w-full max-w-sm rounded-lg overflow-hidden border bg-muted">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={block.content} alt="Preview" className="object-cover w-full h-full" />
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {block.type === "video" && (
+                <div className="space-y-2">
+                  <Input
+                    value={block.content}
+                    onChange={(e) => updateBlock(index, e.target.value)}
+                    placeholder="YouTube Video URL (https://...)"
+                  />
+                </div>
+              )}
             </div>
           </div>
         ))}
+      </div>
 
-        <Button onClick={addSection} variant="outline" className="w-full py-8 border-dashed">
-          <Plus className="mr-2 h-4 w-4" />
-          Add Content Section
+      {/* Add Block Controls */}
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-2 sticky bottom-4 p-2 bg-background/95 backdrop-blur border rounded-lg shadow-lg z-10">
+        <Button variant="outline" onClick={() => addBlock("heading")} className="gap-2">
+          <Heading className="h-4 w-4" />
+          Heading
+        </Button>
+        <Button variant="outline" onClick={() => addBlock("text")} className="gap-2">
+          <Type className="h-4 w-4" />
+          Text
+        </Button>
+        <Button variant="outline" onClick={() => addBlock("code")} className="gap-2">
+          <Code className="h-4 w-4" />
+          Code
+        </Button>
+        <Button variant="outline" onClick={() => addBlock("image")} className="gap-2">
+          <ImageIcon className="h-4 w-4" />
+          Image
+        </Button>
+        <Button variant="outline" onClick={() => addBlock("video")} className="gap-2">
+          <Video className="h-4 w-4" />
+          Video
         </Button>
       </div>
     </div>

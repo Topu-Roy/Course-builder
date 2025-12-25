@@ -15,19 +15,20 @@ export async function generateCourseOutline(topic: string, description: string, 
         description: z.string(),
         content: z.array(
           z.object({
-            heading: z.string(),
-            subHeading: z.string(),
-            imageUrl: z.url().optional(),
-            videoUrl: z.url().optional(),
-            text: z.string().optional(),
-            code: z.string().optional(),
+            type: z.enum(["text", "image", "video", "code", "heading"]),
+            content: z.string(),
+            metadata: z
+              .object({
+                level: z.number().optional(),
+                language: z.string().optional(),
+                caption: z.string().optional(),
+              })
+              .optional(),
           })
         ),
       })
     ),
   });
-
-  // .regex(/^https?:\/\/(www\.)?(youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/shorts\/)[a-zA-Z0-9_-]+/)
 
   const prompt = `
     You are an expert course creator. Create a comprehensive course outline for the topic: "${topic}".
@@ -35,13 +36,18 @@ export async function generateCourseOutline(topic: string, description: string, 
     Author: ${author}.
     Additional context/description: ${description}
     
-    The course should have 5-10 chapters. Each chapter should have a title and a brief summary of the content.
-    For each chapter, provide detailed content including headings, subheadings, and explanatory text.
-    Where appropriate, include code snippets.
+    The course should have 5-10 chapters.
     
-    DO NOT include videoUrl or imageUrl fields - these will be added automatically.
+    For each chapter, provide content as a list of "blocks".
+    Available block types: "heading", "text", "code".
     
-    Ensure the chapters follow a logical progression and the content is educational and engaging.
+    - "heading": The content is the heading text. Set metadata.level to 1, 2, or 3.
+    - "text": The content is the paragraph text.
+    - "code": The content is the code snippet.
+    
+    Structure the content logically: Start with a heading, then text, maybe code if relevant.
+    
+    DO NOT generate "image" or "video" blocks. These will be added later.
   `;
 
   const { object } = await generateObject({

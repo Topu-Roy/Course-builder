@@ -9,14 +9,7 @@ import { CodeBlock } from "@/components/ui/code-block";
 import { YouTubeEmbed } from "@/components/ui/youtube-embed";
 import { ChapterSidebar } from "@/components/chapter-sidebar";
 
-interface ContentSection {
-  heading?: string;
-  subHeading?: string;
-  imageUrl?: string;
-  videoUrl?: string;
-  text?: string;
-  code?: string;
-}
+import { ContentBlock } from "@/lib/types";
 
 export default async function ChapterPage({
   params,
@@ -127,29 +120,32 @@ export default async function ChapterPage({
 
           <div className="prose dark:prose-invert max-w-none mb-10">
             {Array.isArray(chapter.content) &&
-              (chapter.content as ContentSection[]).map((section, index) => (
-                <div key={index} className="mb-8">
-                  {section.heading && <h2 className="text-2xl font-bold mb-2">{section.heading}</h2>}
-                  {section.subHeading && (
-                    <h3 className="text-xl font-semibold mb-3 text-muted-foreground">{section.subHeading}</h3>
+              (chapter.content as unknown as ContentBlock[]).map((block) => (
+                <div key={block.id} className="mb-6">
+                  {block.type === "heading" && (
+                    <h2 className="text-2xl font-bold mb-4 mt-6">{block.content}</h2>
                   )}
-                  {section.text && <p className="mb-4 leading-relaxed">{section.text}</p>}
-                  {section.code && (
+
+                  {block.type === "text" && <p className="mb-4 leading-relaxed">{block.content}</p>}
+
+                  {block.type === "code" && (
                     <div className="mb-4">
-                      <CodeBlock code={section.code} language="typescript" />
+                      <CodeBlock code={block.content} language={block.metadata?.language || "typescript"} />
                     </div>
                   )}
-                  {section.imageUrl && (
-                    <div className="relative w-full h-96 my-4">
+
+                  {block.type === "image" && (
+                    <div className="relative w-full h-96 my-6">
                       <Image
-                        src={section.imageUrl}
-                        alt={section.heading || "Content image"}
+                        src={block.content}
+                        alt="Content image"
                         fill
                         className="rounded-lg object-cover"
                       />
                     </div>
                   )}
-                  {section.videoUrl && <YouTubeEmbed url={section.videoUrl} />}
+
+                  {block.type === "video" && <YouTubeEmbed url={block.content} />}
                 </div>
               ))}
           </div>
