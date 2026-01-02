@@ -1,9 +1,9 @@
 import { db } from "@/server/db";
-import { notFound } from "next/navigation";
-import { CourseEditor } from "@/components/course-editor";
-import { ChaptersList } from "@/components/chapters-list";
-import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
+import Link from "next/link";
+import { notFound } from "next/navigation";
+import { ChaptersList } from "@/components/chapters-list";
+import { CourseEditor } from "@/components/course-editor";
 
 interface CourseEditPageProps {
   params: Promise<{ id: string }>;
@@ -31,10 +31,10 @@ export default async function CourseEditPage({ params }: CourseEditPageProps) {
   }
 
   return (
-    <div className="container mx-auto py-10 max-w-4xl">
+    <div className="container mx-auto max-w-4xl py-10">
       <Link
         href={`/course/${course.id}`}
-        className="mb-8 inline-flex items-center text-sm text-muted-foreground hover:text-foreground"
+        className="text-muted-foreground hover:text-foreground mb-8 inline-flex items-center text-sm"
       >
         <ArrowLeft className="mr-2 h-4 w-4" />
         Back to Course

@@ -1,11 +1,10 @@
 "use server";
 
-import { db } from "@/server/db";
-import { generateCourseOutline } from "./ai";
-import { searchYouTubeVideo } from "@/server/lib/youtube";
-
 import { type CourseCategory, type Prisma } from "@/generated/prisma/client";
+import { db } from "@/server/db";
+import { searchYouTubeVideo } from "@/server/lib/youtube";
 import { type ContentBlock } from "@/lib/types";
+import { generateCourseOutline } from "./ai";
 
 export async function createCourse(
   topic: string,

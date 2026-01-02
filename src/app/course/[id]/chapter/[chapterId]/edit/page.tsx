@@ -1,8 +1,8 @@
 import { db } from "@/server/db";
+import { ArrowLeft } from "lucide-react";
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ChapterContentEditor } from "@/components/chapter-content-editor";
-import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
 
 interface ChapterEditPageProps {
   params: Promise<{
@@ -26,22 +26,18 @@ export default async function ChapterEditPage({ params }: ChapterEditPageProps) 
   }
 
   return (
-    <div className="container mx-auto py-10 max-w-4xl">
+    <div className="container mx-auto max-w-4xl py-10">
       <div className="mb-6">
         <Link
           href={`/course/${id}/edit`}
-          className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground"
+          className="text-muted-foreground hover:text-foreground inline-flex items-center text-sm"
         >
           <ArrowLeft className="mr-2 h-4 w-4" />
           Back to Course Editing
         </Link>
       </div>
 
-      <ChapterContentEditor
-        chapterId={chapter.id}
-        initialTitle={chapter.title}
-        initialContent={chapter.content}
-      />
+      <ChapterContentEditor chapterId={chapter.id} initialTitle={chapter.title} initialContent={chapter.content} />
     </div>
   );
 }

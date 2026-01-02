@@ -1,5 +1,6 @@
 "use server";
 
+import { type Prisma } from "@/generated/prisma/client";
 import { db } from "@/server/db";
 import { revalidatePath } from "next/cache";
 
@@ -23,8 +24,6 @@ export async function createChapter(courseId: string, title: string) {
   revalidatePath(`/course/${courseId}/edit`);
   return chapter;
 }
-
-import { type Prisma } from "@/generated/prisma/client";
 
 export async function updateChapter(chapterId: string, data: { title?: string; content?: unknown }) {
   await db.chapter.update({

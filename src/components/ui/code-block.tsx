@@ -1,9 +1,9 @@
 "use client";
 
 import { useState } from "react";
+import { Check, Copy } from "lucide-react";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { vscDarkPlus } from "react-syntax-highlighter/dist/esm/styles/prism";
-import { Check, Copy } from "lucide-react";
 import { Button } from "./button";
 
 interface CodeBlockProps {
@@ -22,15 +22,15 @@ export function CodeBlock({ code, language = "typescript" }: CodeBlockProps) {
 
   return (
     <div className="relative">
-      <Button size="sm" className="border border-border absolute top-2 right-2 z-10" onClick={handleCopy}>
+      <Button size="sm" className="border-border absolute top-2 right-2 z-10 border" onClick={handleCopy}>
         {copied ? (
           <>
-            <Check className="h-4 w-4 mr-1" />
+            <Check className="mr-1 h-4 w-4" />
             Copied
           </>
         ) : (
           <>
-            <Copy className="h-4 w-4 mr-1" />
+            <Copy className="mr-1 h-4 w-4" />
             Copy
           </>
         )}

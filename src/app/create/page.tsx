@@ -1,16 +1,16 @@
 "use client";
 
 import { useState } from "react";
+import { type CourseCategory } from "@/generated/prisma/client";
+import { createCourse } from "@/server/actions/course";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { toast } from "sonner";
-import { createCourse } from "@/server/actions/course";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { type CourseCategory } from "@/generated/prisma/client";
+import { Textarea } from "@/components/ui/textarea";
 
 const COURSE_CATEGORIES = [
   "TECHNOLOGY",
@@ -56,7 +56,7 @@ export default function CreateCoursePage() {
   }
 
   return (
-    <div className="container mx-auto py-10 max-w-2xl">
+    <div className="container mx-auto max-w-2xl py-10">
       <Card>
         <CardHeader>
           <CardTitle>Create a New Course</CardTitle>

@@ -1,14 +1,12 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { updateCourse, deleteCourse } from "@/server/actions/course-mutation";
-import { toast } from "sonner";
+import { createChapter } from "@/server/actions/chapter";
+import { deleteCourse, updateCourse } from "@/server/actions/course-mutation";
+import { Plus, Save, Trash } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { Trash, Save, Plus } from "lucide-react";
+import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -18,7 +16,9 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { createChapter } from "@/server/actions/chapter";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 
 interface CourseEditorProps {
   course: {
@@ -105,7 +105,7 @@ export const CourseEditor = ({ course }: CourseEditorProps) => {
         </div>
       </div>
 
-      <div className="grid gap-4 p-4 border rounded-lg bg-card text-card-foreground shadow-sm">
+      <div className="bg-card text-card-foreground grid gap-4 rounded-lg border p-4 shadow-sm">
         <div className="grid gap-2">
           <Label htmlFor="title">Course Title</Label>
           <Input id="title" value={title} onChange={(e) => setTitle(e.target.value)} disabled={isPending} />

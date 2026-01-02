@@ -1,26 +1,11 @@
 "use client";
 
-import { type Chapter } from "@/generated/prisma/client";
 import { useEffect, useState, useTransition } from "react";
-import { cn } from "@/lib/utils";
-import { GripVertical, Pencil, Trash } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { useRouter } from "next/navigation";
+import { type Chapter } from "@/generated/prisma/client";
 import { deleteChapter, reorderChapters } from "@/server/actions/chapter";
-import { toast } from "sonner";
-import Link from "next/link";
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import {
-  DndContext,
   closestCenter,
+  DndContext,
   KeyboardSensor,
   PointerSensor,
   useSensor,
@@ -35,6 +20,21 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
+import { GripVertical, Pencil, Trash } from "lucide-react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { cn } from "@/lib/utils";
 
 interface ChaptersListProps {
   courseId: string;
@@ -65,12 +65,12 @@ const SortableChapter = ({ chapter, onDelete, isDeleting, courseId }: SortableCh
       ref={setNodeRef}
       style={style}
       className={cn(
-        "flex items-center gap-x-2 bg-slate-100 border-slate-200 border text-slate-700 rounded-md mb-4 text-sm p-3 relative"
+        "relative mb-4 flex items-center gap-x-2 rounded-md border border-slate-200 bg-slate-100 p-3 text-sm text-slate-700"
       )}
     >
       <div
         className={cn(
-          "px-2 py-3 border-r border-r-slate-200 hover:bg-slate-200 rounded-l-md mr-2 cursor-grab active:cursor-grabbing"
+          "mr-2 cursor-grab rounded-l-md border-r border-r-slate-200 px-2 py-3 hover:bg-slate-200 active:cursor-grabbing"
         )}
         {...attributes}
         {...listeners}
@@ -78,12 +78,12 @@ const SortableChapter = ({ chapter, onDelete, isDeleting, courseId }: SortableCh
         <GripVertical className="h-5 w-5" />
       </div>
 
-      <div className="font-medium truncate">{chapter.title}</div>
+      <div className="truncate font-medium">{chapter.title}</div>
 
-      <div className="ml-auto pr-2 flex items-center gap-x-2">
+      <div className="ml-auto flex items-center gap-x-2 pr-2">
         <Link href={`/course/${courseId}/chapter/${chapter.id}/edit`}>
           <Button size="sm" variant="ghost">
-            <Pencil className="h-4 w-4 mr-2" />
+            <Pencil className="mr-2 h-4 w-4" />
             Edit
           </Button>
         </Link>
@@ -180,7 +180,7 @@ export const ChaptersList = ({ courseId, chapters }: ChaptersListProps) => {
   return (
     <div className="space-y-4">
       {isDirty && (
-        <div className="flex items-center justify-between p-2 bg-yellow-100 border border-yellow-200 rounded text-sm text-yellow-800 mb-4">
+        <div className="mb-4 flex items-center justify-between rounded border border-yellow-200 bg-yellow-100 p-2 text-sm text-yellow-800">
           <span>You have unsaved changes to the chapter order.</span>
           <Button size="sm" onClick={onSaveOrder} disabled={isPending}>
             {isPending ? "Saving..." : "Save Order"}
@@ -203,7 +203,7 @@ export const ChaptersList = ({ courseId, chapters }: ChaptersListProps) => {
       </DndContext>
 
       {items.length === 0 && (
-        <div className="text-center text-sm text-muted-foreground mt-10">
+        <div className="text-muted-foreground mt-10 text-center text-sm">
           No chapters yet. Click &quot;Add Chapter&quot; above.
         </div>
       )}

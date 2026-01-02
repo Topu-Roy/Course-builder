@@ -21,17 +21,17 @@ export function YouTubeEmbed({ url }: YouTubeEmbedProps) {
 
   if (!videoId) {
     return (
-      <div className="aspect-video bg-muted rounded-lg flex items-center justify-center my-4">
+      <div className="bg-muted my-4 flex aspect-video items-center justify-center rounded-lg">
         <p className="text-muted-foreground">Invalid YouTube URL</p>
       </div>
     );
   }
 
   return (
-    <div className="aspect-video my-4 rounded-lg overflow-hidden">
+    <div className="my-4 aspect-video overflow-hidden rounded-lg">
       <iframe
         src={`https://www.youtube.com/embed/${videoId}`}
-        className="w-full h-full"
+        className="h-full w-full"
         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
         allowFullScreen
         title="YouTube video"

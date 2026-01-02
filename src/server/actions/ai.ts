@@ -1,7 +1,7 @@
 "use server";
 
-import { generateObject } from "ai";
 import { google } from "@ai-sdk/google";
+import { generateObject } from "ai";
 import { z } from "zod";
 
 export async function generateCourseOutline(topic: string, description: string, author: string) {
