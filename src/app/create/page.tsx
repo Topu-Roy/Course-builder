@@ -41,9 +41,10 @@ export default function CreateCoursePage() {
     const description = formData.get("description") as string;
     const author = (formData.get("author") as string) || "Anonymous";
     const category = formData.get("category") as CourseCategory;
+    const imageUrl = (formData.get("imageUrl") as string) || undefined;
 
     try {
-      const course = await createCourse(topic, description, author, category);
+      const course = await createCourse(topic, description, author, category, imageUrl);
       toast.success("Course created successfully!");
       router.push(`/course/${course.id}`);
     } catch (error) {
@@ -93,6 +94,17 @@ export default function CreateCoursePage() {
                 </SelectContent>
               </Select>
             </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="imageUrl">Thumbnail URL (Optional)</Label>
+              <Input
+                id="imageUrl"
+                name="imageUrl"
+                placeholder="https://example.com/image.jpg"
+                disabled={loading}
+              />
+            </div>
+
             <div className="space-y-2">
               <Label htmlFor="description">Description (Optional)</Label>
               <Textarea

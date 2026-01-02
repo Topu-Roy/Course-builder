@@ -11,7 +11,8 @@ export async function createCourse(
   topic: string,
   description: string,
   author: string,
-  category: CourseCategory
+  category: CourseCategory,
+  imageUrl?: string
 ) {
   // 1. Generate the course outline using AI
   const courseOutline = await generateCourseOutline(topic, description, author);
@@ -56,6 +57,7 @@ export async function createCourse(
       author: author,
       topic: topic,
       category: category,
+      imageUrl: imageUrl,
       chapters: {
         create: enrichedChapters.map((chapter, index) => ({
           title: chapter.title,

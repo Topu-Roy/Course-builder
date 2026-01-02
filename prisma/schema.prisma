@@ -14,6 +14,7 @@ model Course {
   author      String         @default("Anonymous")
   topic       String         @default("")
   category    CourseCategory
+  imageUrl    String?
   createdAt   DateTime       @default(now())
   updatedAt   DateTime       @updatedAt
   chapters    Chapter[]
