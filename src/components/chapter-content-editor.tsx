@@ -5,18 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import {
-  Trash,
-  Save,
-  ArrowUp,
-  ArrowDown,
-  Type,
-  Image as ImageIcon,
-  Video,
-  Code,
-  Heading,
-  GripVertical,
-} from "lucide-react";
+import { Trash, Save, Type, Image as ImageIcon, Video, Code, Heading, GripVertical } from "lucide-react";
 import { updateChapter } from "@/server/actions/chapter";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
@@ -29,6 +18,8 @@ import {
   useSensor,
   useSensors,
   DragEndEvent,
+  DragOverlay,
+  DragStartEvent,
 } from "@dnd-kit/core";
 import {
   arrayMove,
@@ -38,6 +29,7 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
+import { type SyntheticListenerMap } from "@dnd-kit/core/dist/hooks/utilities";
 
 interface ChapterContentEditorProps {
   chapterId: string;
@@ -45,80 +37,51 @@ interface ChapterContentEditorProps {
   initialTitle: string;
 }
 
-interface BlockItemProps {
+interface BlockRendererProps {
   block: ContentBlock;
-  index: number;
-  totalBlocks: number;
-  updateBlock: (id: string, content: string) => void;
-  updateMetadata: (id: string, field: string, value: string | number) => void;
-  removeBlock: (id: string) => void;
-  moveBlock: (index: number, direction: "up" | "down") => void;
+  updateBlock?: (id: string, content: string) => void;
+  updateMetadata?: (id: string, field: string, value: string | number) => void;
+  removeBlock?: (id: string) => void;
+  dragHandleProps?: SyntheticListenerMap | undefined;
+  isOverlay?: boolean;
 }
 
-const BlockItem = ({
+const BlockRenderer = ({
   block,
-  index,
-  totalBlocks,
   updateBlock,
   updateMetadata,
   removeBlock,
-  moveBlock,
-}: BlockItemProps) => {
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
-    id: block.id,
-  });
-
-  const style = {
-    transform: CSS.Transform.toString(transform),
-    transition,
-    zIndex: isDragging ? 10 : 1,
-    opacity: isDragging ? 0.8 : 1,
-  };
-
+  dragHandleProps,
+  isOverlay,
+}: BlockRendererProps) => {
   return (
     <div
-      ref={setNodeRef}
-      style={style}
-      className="border rounded-lg p-4 relative bg-white dark:bg-slate-950 group transition-all hover:shadow-md mb-4"
+      className={`border rounded-lg p-4 relative bg-white dark:bg-slate-950 group transition-all mb-4 ${
+        isOverlay ? "shadow-xl ring-2 ring-primary cursor-grabbing" : "hover:shadow-md"
+      }`}
     >
       {/* Toolbar */}
       <div className="absolute top-2 right-2 flex items-center gap-1 bg-background/80 backdrop-blur rounded-md p-1 border z-20 shadow-sm">
         <div
-          {...attributes}
-          {...listeners}
+          {...dragHandleProps}
           className="cursor-grab active:cursor-grabbing p-1 hover:bg-muted rounded"
           title="Drag to reorder"
         >
           <GripVertical className="h-4 w-4 text-muted-foreground" />
         </div>
-        <div className="w-px h-3 bg-border mx-1" />
-        <Button
-          variant="ghost"
-          size="icon"
-          className="h-6 w-6"
-          disabled={index === 0}
-          onClick={() => moveBlock(index, "up")}
-        >
-          <ArrowUp className="h-3 w-3" />
-        </Button>
-        <Button
-          variant="ghost"
-          size="icon"
-          className="h-6 w-6"
-          disabled={index === totalBlocks - 1}
-          onClick={() => moveBlock(index, "down")}
-        >
-          <ArrowDown className="h-3 w-3" />
-        </Button>
-        <div className="w-px h-3 bg-border mx-1" />
-        <Button
-          variant="ghost"
-          size="icon"
-          className="h-6 w-6 text-destructive hover:bg-destructive/10"
-          onClick={() => removeBlock(block.id)}
-        >
-          <Trash className="h-3 w-3" />
-        </Button>
+        {removeBlock && (
+          <>
+            <div className="w-px h-3 bg-border mx-1" />
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-6 w-6 text-destructive hover:bg-destructive/10"
+              onClick={() => removeBlock(block.id)}
+            >
+              <Trash className="h-3 w-3" />
+            </Button>
+          </>
+        )}
       </div>
 
       <div className="mr-8">
@@ -133,18 +96,20 @@ const BlockItem = ({
         {block.type === "heading" && (
           <Input
             value={block.content}
-            onChange={(e) => updateBlock(block.id, e.target.value)}
+            onChange={(e) => updateBlock && updateBlock(block.id, e.target.value)}
             className="font-bold text-lg"
             placeholder="Heading Text"
+            readOnly={isOverlay}
           />
         )}
 
         {block.type === "text" && (
           <Textarea
             value={block.content}
-            onChange={(e) => updateBlock(block.id, e.target.value)}
+            onChange={(e) => updateBlock && updateBlock(block.id, e.target.value)}
             placeholder="Type your text content here..."
             className="min-h-[100px]"
+            readOnly={isOverlay}
           />
         )}
 
@@ -152,17 +117,19 @@ const BlockItem = ({
           <div className="space-y-2">
             <Textarea
               value={block.content}
-              onChange={(e) => updateBlock(block.id, e.target.value)}
+              onChange={(e) => updateBlock && updateBlock(block.id, e.target.value)}
               placeholder="Paste code here..."
               className="font-mono text-sm bg-slate-950 text-slate-50 min-h-[150px]"
+              readOnly={isOverlay}
             />
             <div className="flex items-center gap-2">
               <Label className="text-xs">Language:</Label>
               <Input
                 value={block.metadata?.language || ""}
-                onChange={(e) => updateMetadata(block.id, "language", e.target.value)}
+                onChange={(e) => updateMetadata && updateMetadata(block.id, "language", e.target.value)}
                 placeholder="e.g. typescript"
                 className="h-6 w-32 text-xs"
+                readOnly={isOverlay}
               />
             </div>
           </div>
@@ -172,8 +139,9 @@ const BlockItem = ({
           <div className="space-y-2">
             <Input
               value={block.content}
-              onChange={(e) => updateBlock(block.id, e.target.value)}
+              onChange={(e) => updateBlock && updateBlock(block.id, e.target.value)}
               placeholder="Image URL (https://...)"
+              readOnly={isOverlay}
             />
             {block.content && (
               <div className="relative aspect-video w-full max-w-sm rounded-lg overflow-hidden border bg-muted">
@@ -188,12 +156,36 @@ const BlockItem = ({
           <div className="space-y-2">
             <Input
               value={block.content}
-              onChange={(e) => updateBlock(block.id, e.target.value)}
+              onChange={(e) => updateBlock && updateBlock(block.id, e.target.value)}
               placeholder="YouTube Video URL (https://...)"
+              readOnly={isOverlay}
             />
           </div>
         )}
       </div>
+    </div>
+  );
+};
+
+interface SortableBlockItemProps extends BlockRendererProps {
+  id: string;
+}
+
+const SortableBlockItem = ({ id, ...props }: SortableBlockItemProps) => {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+    id,
+  });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    zIndex: isDragging ? 10 : 1,
+    opacity: isDragging ? 0.3 : 1, // Dim original item while dragging
+  };
+
+  return (
+    <div ref={setNodeRef} style={style} {...attributes}>
+      <BlockRenderer {...props} dragHandleProps={listeners} />
     </div>
   );
 };
@@ -208,6 +200,10 @@ export const ChapterContentEditor = ({
   const [blocks, setBlocks] = useState<ContentBlock[]>(
     Array.isArray(initialContent) ? (initialContent as ContentBlock[]) : []
   );
+  const [initialBlocks, setInitialBlocks] = useState<ContentBlock[]>(
+    Array.isArray(initialContent) ? (initialContent as ContentBlock[]) : []
+  );
+  const [activeId, setActiveId] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
 
   const sensors = useSensors(
@@ -248,14 +244,8 @@ export const ChapterContentEditor = ({
     setBlocks((prev) => prev.filter((b) => b.id !== id));
   };
 
-  const moveBlock = (index: number, direction: "up" | "down") => {
-    if (direction === "up" && index === 0) return;
-    if (direction === "down" && index === blocks.length - 1) return;
-
-    const newBlocks = [...blocks];
-    const targetIndex = direction === "up" ? index - 1 : index + 1;
-    [newBlocks[index], newBlocks[targetIndex]] = [newBlocks[targetIndex], newBlocks[index]];
-    setBlocks(newBlocks);
+  const handleDragStart = (event: DragStartEvent) => {
+    setActiveId(event.active.id as string);
   };
 
   const handleDragEnd = (event: DragEndEvent) => {
@@ -269,6 +259,7 @@ export const ChapterContentEditor = ({
         return arrayMove(items, oldIndex, newIndex);
       });
     }
+    setActiveId(null);
   };
 
   const onSave = () => {
@@ -279,6 +270,7 @@ export const ChapterContentEditor = ({
           content: blocks,
         });
         toast.success("Chapter updated successfully");
+        setInitialBlocks(blocks);
         router.refresh();
       } catch {
         toast.error("Failed to update chapter");
@@ -286,13 +278,21 @@ export const ChapterContentEditor = ({
     });
   };
 
+  const isDirty = JSON.stringify(blocks) !== JSON.stringify(initialBlocks) || title !== initialTitle;
+
+  const activeBlock = activeId ? blocks.find((b) => b.id === activeId) : null;
+
   return (
     <div className="space-y-8">
       <div className="flex items-center justify-between sticky top-4 bg-background/95 backdrop-blur z-10 py-4 border-b">
         <h1 className="text-2xl font-bold">Edit Chapter Content</h1>
         <div className="flex gap-2">
-          <Button disabled={isPending} onClick={onSave}>
-            {isPending ? "Saving..." : "Save Changes"}
+          <Button
+            disabled={isPending || !isDirty}
+            onClick={onSave}
+            variant={isDirty ? "default" : "secondary"}
+          >
+            {isPending ? "Saving..." : isDirty ? "Save Changes" : "Saved"}
             <Save className="ml-2 h-4 w-4" />
           </Button>
         </div>
@@ -310,23 +310,36 @@ export const ChapterContentEditor = ({
         </div>
       </div>
 
-      <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+      {isDirty && (
+        <div className="flex items-center justify-between p-2 bg-yellow-100 border border-yellow-200 rounded text-sm text-yellow-800 mb-4 sticky top-[80px] z-10">
+          <span>You have unsaved changes.</span>
+          <Button size="sm" onClick={onSave} disabled={isPending}>
+            Save
+          </Button>
+        </div>
+      )}
+
+      <DndContext
+        sensors={sensors}
+        collisionDetection={closestCenter}
+        onDragStart={handleDragStart}
+        onDragEnd={handleDragEnd}
+      >
         <SortableContext items={blocks} strategy={verticalListSortingStrategy}>
           <div className="space-y-4">
-            {blocks.map((block, index) => (
-              <BlockItem
+            {blocks.map((block) => (
+              <SortableBlockItem
                 key={block.id}
+                id={block.id}
                 block={block}
-                index={index}
-                totalBlocks={blocks.length}
                 updateBlock={updateBlock}
                 updateMetadata={updateMetadata}
                 removeBlock={removeBlock}
-                moveBlock={moveBlock}
               />
             ))}
           </div>
         </SortableContext>
+        <DragOverlay>{activeBlock ? <BlockRenderer block={activeBlock} isOverlay /> : null}</DragOverlay>
       </DndContext>
 
       {/* Add Block Controls */}
