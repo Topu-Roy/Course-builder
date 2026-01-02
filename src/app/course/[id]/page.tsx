@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { CheckCircle, Circle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-import { ContentBlock } from "@/lib/types";
+import { type ContentBlock } from "@/lib/types";
 
 export default async function CoursePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;

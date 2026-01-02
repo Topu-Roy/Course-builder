@@ -1,6 +1,6 @@
 "use client";
 
-import { Chapter } from "@/generated/prisma/client";
+import { type Chapter } from "@/generated/prisma/client";
 import { useEffect, useState, useTransition } from "react";
 import { cn } from "@/lib/utils";
 import { GripVertical, Pencil, Trash } from "lucide-react";
@@ -25,7 +25,7 @@ import {
   PointerSensor,
   useSensor,
   useSensors,
-  DragEndEvent,
+  type DragEndEvent,
 } from "@dnd-kit/core";
 import {
   arrayMove,

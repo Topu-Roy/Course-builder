@@ -1,26 +1,19 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Trash, Save, Type, Image as ImageIcon, Video, Code, Heading, GripVertical } from "lucide-react";
 import { updateChapter } from "@/server/actions/chapter";
-import { toast } from "sonner";
-import { useRouter } from "next/navigation";
-import { ContentBlock, BlockType } from "@/lib/types";
 import {
-  DndContext,
   closestCenter,
+  DndContext,
+  DragOverlay,
   KeyboardSensor,
   PointerSensor,
   useSensor,
   useSensors,
-  DragEndEvent,
-  DragOverlay,
-  DragStartEvent,
+  type DragEndEvent,
+  type DragStartEvent,
 } from "@dnd-kit/core";
+import { type SyntheticListenerMap } from "@dnd-kit/core/dist/hooks/utilities";
 import {
   arrayMove,
   SortableContext,
@@ -29,7 +22,14 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { type SyntheticListenerMap } from "@dnd-kit/core/dist/hooks/utilities";
+import { Code, GripVertical, Heading, Image as ImageIcon, Save, Trash, Type, Video } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { type BlockType, type ContentBlock } from "@/lib/types";
 
 interface ChapterContentEditorProps {
   chapterId: string;
@@ -56,26 +56,26 @@ const BlockRenderer = ({
 }: BlockRendererProps) => {
   return (
     <div
-      className={`border rounded-lg p-4 relative bg-white dark:bg-slate-950 group transition-all mb-4 ${
-        isOverlay ? "shadow-xl ring-2 ring-primary cursor-grabbing" : "hover:shadow-md"
+      className={`group relative mb-4 rounded-lg border bg-white p-4 transition-all dark:bg-slate-950 ${
+        isOverlay ? "ring-primary cursor-grabbing shadow-xl ring-2" : "hover:shadow-md"
       }`}
     >
       {/* Toolbar */}
-      <div className="absolute top-2 right-2 flex items-center gap-1 bg-background/80 backdrop-blur rounded-md p-1 border z-20 shadow-sm">
+      <div className="bg-background/80 absolute top-2 right-2 z-20 flex items-center gap-1 rounded-md border p-1 shadow-sm backdrop-blur">
         <div
           {...dragHandleProps}
-          className="cursor-grab active:cursor-grabbing p-1 hover:bg-muted rounded"
+          className="hover:bg-muted cursor-grab rounded p-1 active:cursor-grabbing"
           title="Drag to reorder"
         >
-          <GripVertical className="h-4 w-4 text-muted-foreground" />
+          <GripVertical className="text-muted-foreground h-4 w-4" />
         </div>
         {removeBlock && (
           <>
-            <div className="w-px h-3 bg-border mx-1" />
+            <div className="bg-border mx-1 h-3 w-px" />
             <Button
               variant="ghost"
               size="icon"
-              className="h-6 w-6 text-destructive hover:bg-destructive/10"
+              className="text-destructive hover:bg-destructive/10 h-6 w-6"
               onClick={() => removeBlock(block.id)}
             >
               <Trash className="h-3 w-3" />
@@ -86,8 +86,8 @@ const BlockRenderer = ({
 
       <div className="mr-8">
         {/* Block Type Badge */}
-        <div className="flex items-center gap-2 mb-2">
-          <span className="text-xs font-mono uppercase text-muted-foreground bg-muted px-2 py-0.5 rounded select-none">
+        <div className="mb-2 flex items-center gap-2">
+          <span className="text-muted-foreground bg-muted rounded px-2 py-0.5 font-mono text-xs uppercase select-none">
             {block.type}
           </span>
         </div>
@@ -96,8 +96,8 @@ const BlockRenderer = ({
         {block.type === "heading" && (
           <Input
             value={block.content}
-            onChange={(e) => updateBlock && updateBlock(block.id, e.target.value)}
-            className="font-bold text-lg"
+            onChange={(e) => updateBlock?.(block.id, e.target.value)}
+            className="text-lg font-bold"
             placeholder="Heading Text"
             readOnly={isOverlay}
           />
@@ -106,7 +106,7 @@ const BlockRenderer = ({
         {block.type === "text" && (
           <Textarea
             value={block.content}
-            onChange={(e) => updateBlock && updateBlock(block.id, e.target.value)}
+            onChange={(e) => updateBlock?.(block.id, e.target.value)}
             placeholder="Type your text content here..."
             className="min-h-[100px]"
             readOnly={isOverlay}
@@ -117,16 +117,16 @@ const BlockRenderer = ({
           <div className="space-y-2">
             <Textarea
               value={block.content}
-              onChange={(e) => updateBlock && updateBlock(block.id, e.target.value)}
+              onChange={(e) => updateBlock?.(block.id, e.target.value)}
               placeholder="Paste code here..."
-              className="font-mono text-sm bg-slate-950 text-slate-50 min-h-[150px]"
+              className="min-h-[150px] bg-slate-950 font-mono text-sm text-slate-50"
               readOnly={isOverlay}
             />
             <div className="flex items-center gap-2">
               <Label className="text-xs">Language:</Label>
               <Input
-                value={block.metadata?.language || ""}
-                onChange={(e) => updateMetadata && updateMetadata(block.id, "language", e.target.value)}
+                value={block.metadata?.language ?? ""}
+                onChange={(e) => updateMetadata?.(block.id, "language", e.target.value)}
                 placeholder="e.g. typescript"
                 className="h-6 w-32 text-xs"
                 readOnly={isOverlay}
@@ -139,14 +139,14 @@ const BlockRenderer = ({
           <div className="space-y-2">
             <Input
               value={block.content}
-              onChange={(e) => updateBlock && updateBlock(block.id, e.target.value)}
+              onChange={(e) => updateBlock?.(block.id, e.target.value)}
               placeholder="Image URL (https://...)"
               readOnly={isOverlay}
             />
             {block.content && (
-              <div className="relative aspect-video w-full max-w-sm rounded-lg overflow-hidden border bg-muted">
+              <div className="bg-muted relative aspect-video w-full max-w-sm overflow-hidden rounded-lg border">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={block.content} alt="Preview" className="object-cover w-full h-full" />
+                <img src={block.content} alt="Preview" className="h-full w-full object-cover" />
               </div>
             )}
           </div>
@@ -156,7 +156,7 @@ const BlockRenderer = ({
           <div className="space-y-2">
             <Input
               value={block.content}
-              onChange={(e) => updateBlock && updateBlock(block.id, e.target.value)}
+              onChange={(e) => updateBlock?.(block.id, e.target.value)}
               placeholder="YouTube Video URL (https://...)"
               readOnly={isOverlay}
             />
@@ -190,11 +190,7 @@ const SortableBlockItem = ({ id, ...props }: SortableBlockItemProps) => {
   );
 };
 
-export const ChapterContentEditor = ({
-  chapterId,
-  initialContent,
-  initialTitle,
-}: ChapterContentEditorProps) => {
+export const ChapterContentEditor = ({ chapterId, initialContent, initialTitle }: ChapterContentEditorProps) => {
   const router = useRouter();
   const [title, setTitle] = useState(initialTitle);
   const [blocks, setBlocks] = useState<ContentBlock[]>(
@@ -284,21 +280,17 @@ export const ChapterContentEditor = ({
 
   return (
     <div className="space-y-8">
-      <div className="flex items-center justify-between sticky top-4 bg-background/95 backdrop-blur z-10 py-4 border-b">
+      <div className="bg-background/95 sticky top-4 z-10 flex items-center justify-between border-b py-4 backdrop-blur">
         <h1 className="text-2xl font-bold">Edit Chapter Content</h1>
         <div className="flex gap-2">
-          <Button
-            disabled={isPending || !isDirty}
-            onClick={onSave}
-            variant={isDirty ? "default" : "secondary"}
-          >
+          <Button disabled={isPending || !isDirty} onClick={onSave} variant={isDirty ? "default" : "secondary"}>
             {isPending ? "Saving..." : isDirty ? "Save Changes" : "Saved"}
             <Save className="ml-2 h-4 w-4" />
           </Button>
         </div>
       </div>
 
-      <div className="grid gap-4 p-4 border rounded-lg bg-card shadow-sm">
+      <div className="bg-card grid gap-4 rounded-lg border p-4 shadow-sm">
         <div className="grid gap-2">
           <Label htmlFor="chapter-title">Chapter Title</Label>
           <Input
@@ -311,7 +303,7 @@ export const ChapterContentEditor = ({
       </div>
 
       {isDirty && (
-        <div className="flex items-center justify-between p-2 bg-yellow-100 border border-yellow-200 rounded text-sm text-yellow-800 mb-4 sticky top-[80px] z-10">
+        <div className="sticky top-[80px] z-10 mb-4 flex items-center justify-between rounded border border-yellow-200 bg-yellow-100 p-2 text-sm text-yellow-800">
           <span>You have unsaved changes.</span>
           <Button size="sm" onClick={onSave} disabled={isPending}>
             Save
@@ -343,7 +335,7 @@ export const ChapterContentEditor = ({
       </DndContext>
 
       {/* Add Block Controls */}
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-2 sticky bottom-4 p-2 bg-background/95 backdrop-blur border rounded-lg shadow-lg z-10">
+      <div className="bg-background/95 sticky bottom-4 z-10 grid grid-cols-2 gap-2 rounded-lg border p-2 shadow-lg backdrop-blur md:grid-cols-5">
         <Button variant="outline" onClick={() => addBlock("heading")} className="gap-2">
           <Heading className="h-4 w-4" />
           Heading

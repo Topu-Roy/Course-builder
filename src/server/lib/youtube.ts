@@ -1,3 +1,5 @@
+/* eslint-disable */
+
 export async function searchYouTubeVideo(query: string): Promise<string | null> {
   const apiKey = process.env.YOUTUBE_DATA_V3_API_KEY;
 

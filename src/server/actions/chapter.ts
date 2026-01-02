@@ -24,7 +24,7 @@ export async function createChapter(courseId: string, title: string) {
   return chapter;
 }
 
-import { Prisma } from "@/generated/prisma/client";
+import { type Prisma } from "@/generated/prisma/client";
 
 export async function updateChapter(chapterId: string, data: { title?: string; content?: unknown }) {
   await db.chapter.update({

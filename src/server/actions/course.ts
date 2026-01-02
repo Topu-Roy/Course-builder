@@ -4,8 +4,8 @@ import { db } from "@/server/db";
 import { generateCourseOutline } from "./ai";
 import { searchYouTubeVideo } from "@/server/lib/youtube";
 
-import { CourseCategory, Prisma } from "@/generated/prisma/client";
-import { ContentBlock } from "@/lib/types";
+import { type CourseCategory, type Prisma } from "@/generated/prisma/client";
+import { type ContentBlock } from "@/lib/types";
 
 export async function createCourse(
   topic: string,

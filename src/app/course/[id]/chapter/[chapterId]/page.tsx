@@ -1,21 +1,16 @@
 import { db } from "@/server/db";
-import { notFound } from "next/navigation";
-import Link from "next/link";
-import Image from "next/image";
-import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { revalidatePath } from "next/cache";
+import Image from "next/image";
+import Link from "next/link";
+import { notFound } from "next/navigation";
+import { Button } from "@/components/ui/button";
 import { CodeBlock } from "@/components/ui/code-block";
 import { YouTubeEmbed } from "@/components/ui/youtube-embed";
 import { ChapterSidebar } from "@/components/chapter-sidebar";
+import { type ContentBlock } from "@/lib/types";
 
-import { ContentBlock } from "@/lib/types";
-
-export default async function ChapterPage({
-  params,
-}: {
-  params: Promise<{ id: string; chapterId: string }>;
-}) {
+export default async function ChapterPage({ params }: { params: Promise<{ id: string; chapterId: string }> }) {
   const { id, chapterId } = await params;
 
   const chapter = await db.chapter.findUnique({
@@ -106,42 +101,35 @@ export default async function ChapterPage({
 
   return (
     <div className="flex h-full">
-      <div className="hidden lg:block w-80 fixed inset-y-0 z-50">
+      <div className="fixed inset-y-0 z-50 hidden w-80 lg:block">
         <ChapterSidebar courseId={course.id} chapters={course.chapters} currentChapterId={chapter.id} />
       </div>
-      <div className="flex-1 lg:pl-80 pt-[80px]">
-        <div className="container mx-auto py-10 max-w-4xl">
+      <div className="flex-1 pt-[80px] lg:pl-80">
+        <div className="container mx-auto max-w-4xl py-10">
           <div className="mb-8">
-            <Link href={`/course/${id}`} className="text-sm text-muted-foreground hover:underline mb-4 block">
+            <Link href={`/course/${id}`} className="text-muted-foreground mb-4 block text-sm hover:underline">
               &larr; Back to Course
             </Link>
-            <h1 className="text-3xl font-bold mb-2">{chapter.title}</h1>
+            <h1 className="mb-2 text-3xl font-bold">{chapter.title}</h1>
           </div>
 
-          <div className="prose dark:prose-invert max-w-none mb-10">
+          <div className="prose dark:prose-invert mb-10 max-w-none">
             {Array.isArray(chapter.content) &&
               (chapter.content as unknown as ContentBlock[]).map((block) => (
                 <div key={block.id} className="mb-6">
-                  {block.type === "heading" && (
-                    <h2 className="text-2xl font-bold mb-4 mt-6">{block.content}</h2>
-                  )}
+                  {block.type === "heading" && <h2 className="mt-6 mb-4 text-2xl font-bold">{block.content}</h2>}
 
                   {block.type === "text" && <p className="mb-4 leading-relaxed">{block.content}</p>}
 
                   {block.type === "code" && (
                     <div className="mb-4">
-                      <CodeBlock code={block.content} language={block.metadata?.language || "typescript"} />
+                      <CodeBlock code={block.content} language={block.metadata?.language ?? "typescript"} />
                     </div>
                   )}
 
                   {block.type === "image" && (
-                    <div className="relative w-full h-96 my-6">
-                      <Image
-                        src={block.content}
-                        alt="Content image"
-                        fill
-                        className="rounded-lg object-cover"
-                      />
+                    <div className="relative my-6 h-96 w-full">
+                      <Image src={block.content} alt="Content image" fill className="rounded-lg object-cover" />
                     </div>
                   )}
 

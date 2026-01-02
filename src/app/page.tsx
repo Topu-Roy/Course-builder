@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { PlusCircle } from "lucide-react";
 
 import { CourseFilter } from "@/components/course-filter";
-import { CourseCategory } from "@/generated/prisma/client";
+import { type CourseCategory } from "@/generated/prisma/client";
 
 export default async function Home({ searchParams }: PageProps<"/">) {
   const { category } = await searchParams;

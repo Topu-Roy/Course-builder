@@ -1,10 +1,10 @@
 "use client";
 
-import { Chapter } from "@/generated/prisma/client";
-import { cn } from "@/lib/utils";
+import { useEffect, useState } from "react";
+import { type Chapter } from "@/generated/prisma/client";
 import { CheckCircle, Lock, PlayCircle } from "lucide-react";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { cn } from "@/lib/utils";
 
 interface ChapterSidebarProps {
   courseId: string;
@@ -24,7 +24,7 @@ export const ChapterSidebar = ({ courseId, chapters, currentChapterId }: Chapter
   useEffect(() => {
     const storedProgress = localStorage.getItem(`course-progress-${courseId}`);
     if (storedProgress) {
-      requestAnimationFrame(() => setProgressMap(JSON.parse(storedProgress)));
+      requestAnimationFrame(() => setProgressMap(JSON.parse(storedProgress) as Record<string, number>));
     }
   }, [courseId]);
 
@@ -113,13 +113,13 @@ export const ChapterSidebar = ({ courseId, chapters, currentChapterId }: Chapter
   }
 
   return (
-    <div className="hidden lg:flex h-full w-80 flex-col fixed inset-y-0 z-50">
-      <div className="h-full border-r flex flex-col overflow-y-auto bg-background shadow-sm">
-        <div className="p-8 pb-4 border-b">
-          <h2 className="font-semibold text-lg">Course Content</h2>
+    <div className="fixed inset-y-0 z-50 hidden h-full w-80 flex-col lg:flex">
+      <div className="bg-background flex h-full flex-col overflow-y-auto border-r shadow-sm">
+        <div className="border-b p-8 pb-4">
+          <h2 className="text-lg font-semibold">Course Content</h2>
         </div>
 
-        <div className="flex flex-col w-full">
+        <div className="flex w-full flex-col">
           {chapters.map((chapter) => {
             const isActive = chapter.id === currentChapterId;
             const progress = progressMap[chapter.id] || 0;
@@ -130,22 +130,19 @@ export const ChapterSidebar = ({ courseId, chapters, currentChapterId }: Chapter
                 key={chapter.id}
                 href={`/course/${courseId}/chapter/${chapter.id}`}
                 className={cn(
-                  "relative flex items-center gap-x-2 text-slate-500 text-sm font-medium pl-6 transition-all hover:text-slate-600 hover:bg-slate-300/20",
-                  isActive && "text-slate-700 bg-slate-200/20 hover:bg-slate-200/20 hover:text-slate-700",
+                  "relative flex items-center gap-x-2 pl-6 text-sm font-medium text-slate-500 transition-all hover:bg-slate-300/20 hover:text-slate-600",
+                  isActive && "bg-slate-200/20 text-slate-700 hover:bg-slate-200/20 hover:text-slate-700",
                   isCompleted && "text-emerald-700 hover:text-emerald-700",
                   isCompleted && isActive && "bg-emerald-200/20"
                 )}
               >
-                <div className="flex items-center gap-x-2 py-4 z-10 w-full pr-4">
+                <div className="z-10 flex w-full items-center gap-x-2 py-4 pr-4">
                   <button
                     onClick={(e) => toggleManualComplete(chapter.id, e)}
-                    className="hover:scale-110 transition-transform focus:outline-none"
+                    className="transition-transform hover:scale-110 focus:outline-none"
                   >
                     {isCompleted ? (
-                      <CheckCircle
-                        size={22}
-                        className={cn("text-emerald-500", isActive && "text-emerald-700")}
-                      />
+                      <CheckCircle size={22} className={cn("text-emerald-500", isActive && "text-emerald-700")} />
                     ) : isActive ? (
                       <PlayCircle size={22} className={cn("text-slate-500", isActive && "text-slate-700")} />
                     ) : (
@@ -155,15 +152,13 @@ export const ChapterSidebar = ({ courseId, chapters, currentChapterId }: Chapter
                   <div className="flex flex-col">
                     <span className={cn("line-clamp-1", isActive && "font-semibold")}>{chapter.title}</span>
                     {isActive && progress < 100 && (
-                      <span className="text-xs text-muted-foreground">
-                        {Math.round(100 - progress)}% left
-                      </span>
+                      <span className="text-muted-foreground text-xs">{Math.round(100 - progress)}% left</span>
                     )}
                   </div>
                 </div>
 
                 {/* Progress Track */}
-                <div className="absolute bottom-0 left-0 w-full h-[2px] bg-slate-100" />
+                <div className="absolute bottom-0 left-0 h-[2px] w-full bg-slate-100" />
 
                 {/* Progress Indicator */}
                 <div
@@ -176,7 +171,7 @@ export const ChapterSidebar = ({ courseId, chapters, currentChapterId }: Chapter
 
                 <div
                   className={cn(
-                    "absolute right-0 top-0 bottom-0 w-1 bg-transparent transition-all",
+                    "absolute top-0 right-0 bottom-0 w-1 bg-transparent transition-all",
                     isActive && "bg-slate-700",
                     isCompleted && "bg-emerald-700"
                   )}

@@ -1,8 +1,8 @@
 "use client";
 
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { type CourseCategory } from "@/generated/prisma/client";
 import { useRouter, useSearchParams } from "next/navigation";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 export const COURSE_CATEGORIES = [
   "TECHNOLOGY",
@@ -23,7 +23,7 @@ export const COURSE_CATEGORIES = [
 export const CourseFilter = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const currentCategory = searchParams.get("category") || "ALL";
+  const currentCategory = searchParams.get("category") ?? "ALL";
 
   const onSelectChange = (value: string) => {
     const params = new URLSearchParams(searchParams.toString());
