@@ -1,0 +1,20 @@
+{
+  "importOrder": [
+    "^types$",
+    "^(react/(.*)$)|^(react$)",
+    "^(@tanstack/react-router/(.*)$)|^(@tanstack/react-router$)",
+    "^(@tanstack/(.*)$)|^(@tanstack$)",
+    "<THIRD_PARTY_MODULES>",
+    "^@/components/ui/(.*)$",
+    "^@/components/(.*)$",
+    "^@/lib/(.*)$",
+    "^@/hooks/(.*)$",
+    "^[./]"
+  ],
+  "printWidth": 115,
+  "arrowParens": "always",
+  "trailingComma": "es5",
+  "proseWrap": "preserve",
+  "importOrderParserPlugins": ["typescript", "jsx", "decorators-legacy"],
+  "plugins": ["@ianvs/prettier-plugin-sort-imports", "prettier-plugin-tailwindcss"]
+}
