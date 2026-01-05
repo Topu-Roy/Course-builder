@@ -51,6 +51,7 @@ export async function createCourse(
   // 3. Save the course to the database
   const course = await db.course.create({
     data: {
+      creatorId: "", // TODO: Get the current user ID
       title: courseOutline.courseTitle,
       description: courseOutline.courseDescription,
       author: author,

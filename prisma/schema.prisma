@@ -43,7 +43,7 @@ enum CourseCategory {
 model Chapter {
   id           String         @id @default(cuid())
   title        String
-  content      Json
+  blocks       ContentBlock[]
   order        Int
   courseId     String
   createdAt    DateTime       @default(now())
@@ -51,6 +51,18 @@ model Chapter {
   userProgress UserProgress[]
 
   course Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+}
+
+model ContentBlock {
+  id        String   @id @default(cuid())
+  chapterId String
+  chapter   Chapter  @relation(fields: [chapterId], references: [id], onDelete: Cascade)
+  type      String
+  content   String
+  metadata  Json?
+  order     Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model UserProgress {
