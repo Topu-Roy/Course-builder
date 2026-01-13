@@ -4,7 +4,7 @@ import { google } from "@ai-sdk/google";
 import { generateObject } from "ai";
 import { z } from "zod";
 
-export async function generateCourseOutline(topic: string, description: string, author: string) {
+export async function generateCourseOutline(topic: string, description: string) {
   const schema = z.object({
     courseTitle: z.string(),
     courseDescription: z.string(),
@@ -32,8 +32,6 @@ export async function generateCourseOutline(topic: string, description: string, 
 
   const prompt = `
     You are an expert course creator. Create a comprehensive course outline for the topic: "${topic}".
-    
-    Author: ${author}.
     Additional context/description: ${description}
     
     The course should have 5-10 chapters.

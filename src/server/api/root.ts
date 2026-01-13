@@ -1,12 +1,12 @@
 import { createCallerFactory, createTRPCRouter } from "@/server/api/trpc";
-import { memoryRouter } from "./routers/memory";
+import { courseRouter } from "./routers/course";
 
 /**
  *
  * All routers added in /api/routers should be manually added here.
  */
 export const appRouter = createTRPCRouter({
-  memory: memoryRouter,
+  course: courseRouter,
 });
 
 // export type definition of API

@@ -8,16 +8,15 @@ import { type ContentBlock } from "@/lib/types";
 const createCourseInput = object({
   topic: string().min(3),
   description: string().min(3),
-  author: string().min(3), // Kept for API compatibility
   category: enum_(COURSE_CATEGORIES),
   imageUrl: string().optional(),
 });
 
 export const courseRouter = createTRPCRouter({
   createCourse: protectedProcedure.input(createCourseInput).mutation(async ({ ctx, input }) => {
-    const { topic, description, author, category, imageUrl } = input;
+    const { topic, description, category, imageUrl } = input;
     // 1. Generate the course outline using AI
-    const courseOutline = await generateCourseOutline(topic, description, author);
+    const courseOutline = await generateCourseOutline(topic, description);
 
     // 2. Enrich content with real YouTube videos
     const enrichedChapters = await Promise.all(
@@ -83,11 +82,6 @@ export const courseRouter = createTRPCRouter({
       },
       select: {
         id: true,
-        title: true,
-        description: true,
-        topic: true,
-        category: true,
-        imageUrl: true,
       },
     });
 

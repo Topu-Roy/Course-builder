@@ -1,8 +1,7 @@
 "use client";
 
-import { useState } from "react";
 import { type CourseCategory } from "@/generated/prisma/client";
-import { createCourse } from "@/server/actions/course";
+import { api } from "@/trpc/react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -30,29 +29,27 @@ const COURSE_CATEGORIES = [
 
 export default function CreateCoursePage() {
   const router = useRouter();
-  const [loading, setLoading] = useState(false);
+  const { mutate: createCourse, isPending } = api.course.createCourse.useMutation();
 
   async function onSubmit(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    setLoading(true);
-
     const formData = new FormData(event.currentTarget);
     const topic = formData.get("topic") as string;
     const description = formData.get("description") as string;
-    const author = (formData.get("author") as string) || "Anonymous";
     const category = formData.get("category") as CourseCategory;
-    const imageUrl = (formData.get("imageUrl") as string) || undefined;
+    const imageUrl = (formData.get("imageUrl") as string) ?? undefined;
 
-    try {
-      const course = await createCourse(topic, description, author, category, imageUrl);
-      toast.success("Course created successfully!");
-      router.push(`/course/${course.id}`);
-    } catch (error) {
-      console.error(error);
-      toast.error("Something went wrong. Please try again.");
-    } finally {
-      setLoading(false);
-    }
+    createCourse(
+      { topic, description, category, imageUrl },
+      {
+        onSuccess(data) {
+          toast.success("Successfully created course! 🎉");
+          router.push(`/course/${data.id}`);
+        },
+        onError() {
+          toast.error("Something went wrong. Please try again.");
+        },
+      }
+    );
   }
 
   return (
@@ -71,12 +68,12 @@ export default function CreateCoursePage() {
                 name="topic"
                 placeholder="e.g. Introduction to Python"
                 required
-                disabled={loading}
+                disabled={isPending}
               />
             </div>
             <div className="space-y-2">
               <Label htmlFor="author">Author</Label>
-              <Input id="author" name="author" placeholder="Your name" disabled={loading} />
+              <Input id="author" name="author" placeholder="Your name" disabled={isPending} />
             </div>
 
             <div className="space-y-2">
@@ -101,7 +98,7 @@ export default function CreateCoursePage() {
                 id="imageUrl"
                 name="imageUrl"
                 placeholder="https://example.com/image.jpg"
-                disabled={loading}
+                disabled={isPending}
               />
             </div>
 
@@ -111,11 +108,11 @@ export default function CreateCoursePage() {
                 id="description"
                 name="description"
                 placeholder="What specific areas should this course cover?"
-                disabled={loading}
+                disabled={isPending}
               />
             </div>
-            <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? "Generating Course..." : "Create Course"}
+            <Button type="submit" className="w-full" disabled={isPending}>
+              {isPending ? "Generating Course..." : "Create Course"}
             </Button>
           </form>
         </CardContent>
