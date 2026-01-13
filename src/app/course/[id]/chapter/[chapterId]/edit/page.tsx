@@ -3,6 +3,7 @@ import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ChapterContentEditor } from "@/components/chapter-content-editor";
+import { type ContentBlock } from "@/lib/types";
 
 interface ChapterEditPageProps {
   params: Promise<{
@@ -19,11 +20,24 @@ export default async function ChapterEditPage({ params }: ChapterEditPageProps) 
       id: chapterId,
       courseId: id,
     },
+    include: {
+      blocks: {
+        orderBy: { order: "asc" },
+      },
+    },
   });
 
   if (!chapter) {
     notFound();
   }
+
+  // Transform blocks to ContentBlock format for the editor
+  const contentBlocks: ContentBlock[] = chapter.blocks.map((block) => ({
+    id: block.id,
+    type: block.type as ContentBlock["type"],
+    content: block.content,
+    metadata: block.metadata as ContentBlock["metadata"],
+  }));
 
   return (
     <div className="container mx-auto max-w-4xl py-10">
@@ -37,7 +51,7 @@ export default async function ChapterEditPage({ params }: ChapterEditPageProps) 
         </Link>
       </div>
 
-      <ChapterContentEditor chapterId={chapter.id} initialTitle={chapter.title} initialContent={chapter.content} />
+      <ChapterContentEditor chapterId={chapter.id} initialTitle={chapter.title} initialContent={contentBlocks} />
     </div>
   );
 }

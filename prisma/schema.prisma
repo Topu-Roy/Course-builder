@@ -12,7 +12,6 @@ model Course {
   creatorId   String
   title       String
   description String
-  author      String         @default("Anonymous")
   topic       String         @default("")
   category    CourseCategory
   imageUrl    String?

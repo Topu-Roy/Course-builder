@@ -1,6 +1,6 @@
 "use server";
 
-import { type CourseCategory, type Prisma } from "@/generated/prisma/client";
+import { type CourseCategory } from "@/generated/prisma/client";
 import { db } from "@/server/db";
 import { searchYouTubeVideo } from "@/server/lib/youtube";
 import { type ContentBlock } from "@/lib/types";
@@ -9,12 +9,12 @@ import { generateCourseOutline } from "./ai";
 export async function createCourse(
   topic: string,
   description: string,
-  author: string,
+  _author: string, // Kept for API compatibility but not stored
   category: CourseCategory,
   imageUrl?: string
 ) {
   // 1. Generate the course outline using AI
-  const courseOutline = await generateCourseOutline(topic, description, author);
+  const courseOutline = await generateCourseOutline(topic, description, _author);
 
   // 2. Enrich content with real YouTube videos
   const enrichedChapters = await Promise.all(
@@ -54,15 +54,27 @@ export async function createCourse(
       creatorId: "", // TODO: Get the current user ID
       title: courseOutline.courseTitle,
       description: courseOutline.courseDescription,
-      author: author,
       topic: topic,
       category: category,
       imageUrl: imageUrl,
       chapters: {
         create: enrichedChapters.map((chapter, index) => ({
           title: chapter.title,
-          content: chapter.content as unknown as Prisma.InputJsonValue,
           order: index,
+          blocks: {
+            create: chapter.content.map((block, blockIndex) => ({
+              id: block.id,
+              type: block.type,
+              content: block.content,
+              metadata: {
+                caption: block.metadata?.caption,
+                language: block.metadata?.language,
+                level: block.metadata?.level,
+                subHeading: block.metadata?.subHeading,
+              },
+              order: blockIndex,
+            })),
+          },
         })),
       },
     },

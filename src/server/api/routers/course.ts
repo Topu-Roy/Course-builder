@@ -8,7 +8,7 @@ import { type ContentBlock } from "@/lib/types";
 const createCourseInput = object({
   topic: string().min(3),
   description: string().min(3),
-  author: string().min(3),
+  author: string().min(3), // Kept for API compatibility
   category: enum_(COURSE_CATEGORIES),
   imageUrl: string().optional(),
 });
@@ -57,15 +57,27 @@ export const courseRouter = createTRPCRouter({
         creatorId: ctx.user.id,
         title: courseOutline.courseTitle,
         description: courseOutline.courseDescription,
-        author: author,
         topic: topic,
         category: category,
         imageUrl: imageUrl,
         chapters: {
           create: enrichedChapters.map((chapter, index) => ({
             title: chapter.title,
-            content: chapter.content,
             order: index,
+            blocks: {
+              create: chapter.content.map((block, blockIndex) => ({
+                id: block.id,
+                type: block.type,
+                content: block.content,
+                metadata: {
+                  caption: block.metadata?.caption,
+                  language: block.metadata?.language,
+                  level: block.metadata?.level,
+                  subHeading: block.metadata?.subHeading,
+                },
+                order: blockIndex,
+              })),
+            },
           })),
         },
       },
@@ -73,7 +85,6 @@ export const courseRouter = createTRPCRouter({
         id: true,
         title: true,
         description: true,
-        author: true,
         topic: true,
         category: true,
         imageUrl: true,
