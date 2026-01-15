@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import { Suspense } from "react";
 import { TRPCReactProvider } from "@/trpc/react";
 import { Navbar } from "@/components/navbar";
 
@@ -28,7 +29,9 @@ export default function RootLayout({
     <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         <TRPCReactProvider>
-          <Navbar />
+          <Suspense>
+            <Navbar />
+          </Suspense>
           {children}
         </TRPCReactProvider>
       </body>
