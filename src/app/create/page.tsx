@@ -2,43 +2,18 @@
 
 import { useForm } from "@tanstack/react-form";
 import type { CourseCategory } from "@/generated/prisma/enums";
+import { createCourseInput } from "@/server/api/routers/course";
 import { api } from "@/trpc/react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import z from "zod/v3";
+import { type infer as zodInfer } from "zod/v4";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Field, FieldError, FieldGroup, FieldLabel, FieldSet } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-
-const category = [
-  "TECHNOLOGY",
-  "BUSINESS",
-  "FINANCE",
-  "MARKETING",
-  "DESIGN",
-  "ART",
-  "SCIENCE",
-  "ACADEMIC",
-  "HEALTH",
-  "FITNESS",
-  "MUSIC",
-  "LIFESTYLE",
-  "OTHER",
-] as const satisfies CourseCategory[];
-
-const formSchema = z.object({
-  topic: z.string().nonempty({
-    message: "Topic is required",
-  }),
-  description: z.string().nonempty({
-    message: "Description is required",
-  }),
-  category: z.enum(category, { message: "Select a category" }),
-  imageUrl: z.string(),
-});
+import { COURSE_CATEGORIES } from "@/components/course-filter";
 
 export default function CreateCoursePage() {
   const router = useRouter();
@@ -50,12 +25,14 @@ export default function CreateCoursePage() {
       description: "",
       category: "" as CourseCategory,
       imageUrl: "",
-    } satisfies z.infer<typeof formSchema>,
+    } satisfies zodInfer<typeof createCourseInput>,
     validators: {
-      onSubmit: formSchema,
-      onChange: formSchema,
+      onSubmit: createCourseInput,
+      onChange: createCourseInput,
     },
     onSubmit: ({ value }) => {
+      console.log(value);
+
       createCourse(
         {
           topic: value.topic,
@@ -126,7 +103,7 @@ export default function CreateCoursePage() {
                             <SelectValue placeholder="Category" />
                           </SelectTrigger>
                           <SelectContent>
-                            {category.map((item) => (
+                            {COURSE_CATEGORIES.map((item) => (
                               <SelectItem key={item} value={item}>
                                 {item.charAt(0).toUpperCase() + item.slice(1).toLowerCase()}
                               </SelectItem>

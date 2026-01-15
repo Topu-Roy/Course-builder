@@ -5,11 +5,15 @@ import { enum as enum_, object, string } from "zod/v4";
 import { COURSE_CATEGORIES } from "@/components/course-filter";
 import { type ContentBlock } from "@/lib/types";
 
-const createCourseInput = object({
-  topic: string().min(3),
-  description: string().min(3),
-  category: enum_(COURSE_CATEGORIES),
-  imageUrl: string().optional(),
+export const createCourseInput = object({
+  topic: string().nonempty({
+    message: "Topic is required",
+  }),
+  description: string().nonempty({
+    message: "Description is required",
+  }),
+  category: enum_(COURSE_CATEGORIES, { message: "Select a category" }),
+  imageUrl: string(),
 });
 
 export const courseRouter = createTRPCRouter({
