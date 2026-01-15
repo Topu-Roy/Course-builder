@@ -2,7 +2,7 @@
 
 import { useForm } from "@tanstack/react-form";
 import type { CourseCategory } from "@/generated/prisma/enums";
-import { createCourseInput } from "@/server/api/routers/course";
+import { createCourseInput } from "@/server/api/routers/schema/validators";
 import { api } from "@/trpc/react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
@@ -13,7 +13,7 @@ import { Field, FieldError, FieldGroup, FieldLabel, FieldSet } from "@/component
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { COURSE_CATEGORIES } from "@/components/course-filter";
+import { COURSE_CATEGORIES } from "@/lib/constants";
 
 export default function CreateCoursePage() {
   const router = useRouter();
@@ -96,6 +96,7 @@ export default function CreateCoursePage() {
                       <Field data-invalid={isInvalid}>
                         <FieldLabel htmlFor={field.name}>Category</FieldLabel>
                         <Select
+                          value={field.state.value}
                           onValueChange={(val) => field.handleChange(val as CourseCategory)}
                           disabled={isPending}
                         >

@@ -1,20 +1,8 @@
 import { generateCourseOutline } from "@/server/actions/ai";
+import { createCourseInput } from "@/server/api/routers/schema/validators";
 import { createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
 import { searchYouTubeVideo } from "@/server/lib/youtube";
-import { enum as enum_, object, string } from "zod/v4";
-import { COURSE_CATEGORIES } from "@/components/course-filter";
 import { type ContentBlock } from "@/lib/types";
-
-export const createCourseInput = object({
-  topic: string().nonempty({
-    message: "Topic is required",
-  }),
-  description: string().nonempty({
-    message: "Description is required",
-  }),
-  category: enum_(COURSE_CATEGORIES, { message: "Select a category" }),
-  imageUrl: string(),
-});
 
 export const courseRouter = createTRPCRouter({
   createCourse: protectedProcedure.input(createCourseInput).mutation(async ({ ctx, input }) => {
