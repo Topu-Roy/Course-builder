@@ -1,14 +1,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { type Chapter } from "@/generated/prisma/client";
 import { CheckCircle, Lock, PlayCircle } from "lucide-react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 
 interface ChapterSidebarProps {
   courseId: string;
-  chapters: Chapter[];
+  chapters: { id: string; title: string; order: number }[];
   currentChapterId: string;
 }
 

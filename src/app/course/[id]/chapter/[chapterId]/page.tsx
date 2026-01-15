@@ -6,30 +6,51 @@ import { Button } from "@/components/ui/button";
 import { ChapterSidebar } from "@/components/chapter-sidebar";
 import { ContentBlockRenderer } from "@/components/content-block-renderer";
 import { ToggleCompletionButton } from "@/components/toggle-completion-button";
+import { getServerSession } from "@/lib/auth";
 import { type ContentBlock } from "@/lib/types";
 
-interface ChapterPageProps {
-  params: Promise<{ id: string; chapterId: string }>;
-}
-
-export default async function ChapterPage({ params }: ChapterPageProps) {
+export default async function ChapterPage({ params }: PageProps<"/course/[id]/chapter/[chapterId]">) {
   const { id, chapterId } = await params;
+  const session = await getServerSession();
 
   // Single query that gets all needed data including blocks
   const chapter = await db.chapter.findUnique({
     where: { id: chapterId },
-    include: {
+    select: {
+      id: true,
+      title: true,
+      order: true,
       blocks: {
         orderBy: { order: "asc" },
+        select: {
+          id: true,
+          type: true,
+          content: true,
+          metadata: true,
+        },
       },
       course: {
-        include: {
+        select: {
+          id: true,
+          title: true,
           chapters: {
+            select: {
+              id: true,
+              title: true,
+              order: true,
+            },
             orderBy: { order: "asc" },
           },
         },
       },
-      userProgress: true,
+      userProgress: {
+        where: {
+          userId: session?.user.id,
+        },
+        select: {
+          completed: true,
+        },
+      },
     },
   });
 
