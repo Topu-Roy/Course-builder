@@ -1,5 +1,10 @@
 import { generateCourseOutline } from "@/server/actions/ai";
-import { createCourseInput } from "@/server/api/routers/schema/validators";
+import {
+  createCourseInput,
+  getChapterInput,
+  getProgressInput,
+  updateProgressInput,
+} from "@/server/api/routers/schema/validators";
 import { createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
 import { searchYouTubeVideo } from "@/server/lib/youtube";
 import { type ContentBlock } from "@/lib/types";
@@ -78,5 +83,92 @@ export const courseRouter = createTRPCRouter({
     });
 
     return course;
+  }),
+
+  getChapter: protectedProcedure.input(getChapterInput).query(async ({ ctx, input }) => {
+    const { chapterId } = input;
+
+    const chapter = await ctx.db.chapter.findUnique({
+      where: {
+        id: chapterId,
+      },
+      select: {
+        id: true,
+        title: true,
+        order: true,
+        blocks: {
+          select: {
+            id: true,
+            type: true,
+            content: true,
+            metadata: true,
+            order: true,
+          },
+        },
+      },
+    });
+
+    return chapter;
+  }),
+
+  updateProgress: protectedProcedure.input(updateProgressInput).mutation(async ({ ctx, input }) => {
+    const { chapterId, progress } = input;
+
+    const userProgress = await ctx.db.userProgress.findUnique({
+      where: {
+        userId_chapterId: {
+          userId: ctx.user.id,
+          chapterId: chapterId,
+        },
+      },
+      select: {
+        progress: true,
+        completed: true,
+      },
+    });
+
+    if (!userProgress) {
+      throw new Error("User progress not found");
+    }
+
+    await ctx.db.userProgress.update({
+      where: {
+        userId_chapterId: {
+          userId: ctx.user.id,
+          chapterId: chapterId,
+        },
+      },
+      data: {
+        progress: progress,
+        completed: progress === 100,
+      },
+      select: {
+        id: true,
+      },
+    });
+
+    return userProgress;
+  }),
+
+  getProgress: protectedProcedure.input(getProgressInput).query(async ({ ctx, input }) => {
+    const { chapterId } = input;
+
+    const userProgress = await ctx.db.userProgress.findUnique({
+      where: {
+        userId_chapterId: {
+          userId: ctx.user.id,
+          chapterId: chapterId,
+        },
+      },
+      select: {
+        id: true,
+        progress: true,
+        completed: true,
+        updatedAt: true,
+        chapterId: true,
+      },
+    });
+
+    return userProgress;
   }),
 });

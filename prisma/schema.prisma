@@ -68,6 +68,7 @@ model UserProgress {
   id        String   @id @default(cuid())
   userId    String
   chapterId String
+  progress  Int      @default(0)
   completed Boolean  @default(false)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
