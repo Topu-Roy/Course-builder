@@ -33,6 +33,7 @@ export function CourseSidebarButton({ chapterId, courseId }: { chapterId: string
         {
           onSuccess: () => {
             void utils.course.getProgress.invalidate();
+            void utils.course.getProgress.refetch();
           },
         }
       );
