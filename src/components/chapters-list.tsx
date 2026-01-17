@@ -1,8 +1,7 @@
 "use client";
 
-import { useEffect, useState, useTransition } from "react";
-import { type Chapter } from "@/generated/prisma/client";
-import { deleteChapter, reorderChapters } from "@/server/actions/chapter";
+import { useEffect, useState } from "react";
+import { api } from "@/trpc/react";
 import {
   closestCenter,
   DndContext,
@@ -38,11 +37,11 @@ import { cn } from "@/lib/utils";
 
 interface ChaptersListProps {
   courseId: string;
-  chapters: Chapter[];
+  chapters: { id: string; title: string; order: number }[];
 }
 
 interface SortableChapterProps {
-  chapter: Chapter;
+  chapter: { id: string; title: string; order: number };
   onDelete: (id: string) => void;
   isDeleting: boolean;
   courseId: string;
@@ -116,8 +115,29 @@ const SortableChapter = ({ chapter, onDelete, isDeleting, courseId }: SortableCh
 
 export const ChaptersList = ({ courseId, chapters }: ChaptersListProps) => {
   const router = useRouter();
-  const [isPending, startTransition] = useTransition();
-  const [items, setItems] = useState<Chapter[]>(chapters);
+  const { mutate: reorderChapters, isPending: isReorderPending } = api.chapter.reorder.useMutation({
+    onSuccess: () => {
+      toast.success("Chapters reordered");
+      router.refresh();
+    },
+    onError: () => {
+      toast.error("Something went wrong");
+    },
+  });
+
+  const { mutate: deleteChapter, isPending: isDeletePending } = api.chapter.delete.useMutation({
+    onSuccess: () => {
+      toast.success("Chapter deleted");
+      router.refresh();
+    },
+    onError: () => {
+      toast.error("Something went wrong");
+    },
+  });
+
+  const isPending = isReorderPending || isDeletePending;
+
+  const [items, setItems] = useState<{ id: string; title: string; order: number }[]>(chapters);
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
   // Sync state if props change (unlikely in this flow but good practice)
@@ -146,32 +166,21 @@ export const ChaptersList = ({ courseId, chapters }: ChaptersListProps) => {
   };
 
   const onSaveOrder = () => {
-    startTransition(async () => {
-      try {
-        const updateList = items.map((chapter, index) => ({
-          id: chapter.id,
-          order: index,
-        }));
-        await reorderChapters(updateList);
-        toast.success("Chapters reordered");
-        router.refresh();
-      } catch {
-        toast.error("Something went wrong");
-      }
-    });
+    const updateList = items.map((chapter, index) => ({
+      id: chapter.id,
+      order: index,
+    }));
+    reorderChapters({ list: updateList });
   };
 
-  const onDelete = async (chapterId: string) => {
-    try {
-      setDeletingId(chapterId);
-      await deleteChapter(chapterId);
-      toast.success("Chapter deleted");
-      router.refresh();
-    } catch {
-      toast.error("Something went wrong");
-    } finally {
-      setDeletingId(null);
-    }
+  const onDelete = (chapterId: string) => {
+    setDeletingId(chapterId);
+    deleteChapter(
+      { chapterId },
+      {
+        onSettled: () => setDeletingId(null),
+      }
+    );
   };
 
   // Check if order changed

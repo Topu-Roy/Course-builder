@@ -53,15 +53,26 @@ model Chapter {
 }
 
 model ContentBlock {
-  id        String   @id @default(cuid())
+  id        String         @id @default(cuid())
   chapterId String
-  chapter   Chapter  @relation(fields: [chapterId], references: [id], onDelete: Cascade)
+  chapter   Chapter        @relation(fields: [chapterId], references: [id], onDelete: Cascade)
   type      String
   content   String
-  metadata  Json?
+  metadata  BlockMetadata?
   order     Int
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+}
+
+model BlockMetadata {
+  id             String       @id @default(cuid())
+  contentBlockId String       @unique
+  block          ContentBlock @relation(fields: [contentBlockId], references: [id], onDelete: Cascade)
+
+  caption    String?
+  language   String?
+  level      Int?
+  subHeading String?
 }
 
 model UserProgress {

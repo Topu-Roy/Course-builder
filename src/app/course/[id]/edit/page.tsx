@@ -1,4 +1,4 @@
-import { db } from "@/server/db";
+import { api } from "@/trpc/server";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -13,18 +13,7 @@ export default async function CourseEditPage({ params }: CourseEditPageProps) {
   // Await params first (Next.js 15+ requirement)
   const { id } = await params;
 
-  const course = await db.course.findUnique({
-    where: {
-      id: id,
-    },
-    include: {
-      chapters: {
-        orderBy: {
-          order: "asc",
-        },
-      },
-    },
-  });
+  const course = await api.course.get({ courseId: id });
 
   if (!course) {
     notFound();

@@ -1,8 +1,7 @@
 "use client";
 
-import { useState, useTransition } from "react";
-import { createChapter } from "@/server/actions/chapter";
-import { deleteCourse, updateCourse } from "@/server/actions/course-mutation";
+import { useState } from "react";
+import { api } from "@/trpc/react";
 import { Plus, Save, Trash } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
@@ -32,42 +31,49 @@ export const CourseEditor = ({ course }: CourseEditorProps) => {
   const router = useRouter();
   const [title, setTitle] = useState(course.title);
   const [description, setDescription] = useState(course.description);
-  const [isPending, startTransition] = useTransition();
+
+  const { mutate: updateCourse, isPending: isUpdatePending } = api.course.update.useMutation({
+    onSuccess: () => {
+      toast.success("Course updated");
+      router.refresh();
+    },
+    onError: () => {
+      toast.error("Something went wrong");
+    },
+  });
+
+  const { mutate: deleteCourse, isPending: isDeletePending } = api.course.delete.useMutation({
+    onSuccess: () => {
+      toast.success("Course deleted");
+      router.push("/");
+    },
+    onError: () => {
+      toast.error("Something went wrong");
+    },
+  });
+
+  const { mutate: createChapter, isPending: isCreatePending } = api.chapter.create.useMutation({
+    onSuccess: () => {
+      toast.success("Chapter created");
+      router.refresh();
+    },
+    onError: () => {
+      toast.error("Something went wrong");
+    },
+  });
+
+  const isPending = isUpdatePending || isDeletePending || isCreatePending;
 
   const onSave = () => {
-    startTransition(async () => {
-      try {
-        await updateCourse(course.id, { title, description });
-        toast.success("Course updated");
-        router.refresh();
-      } catch {
-        toast.error("Something went wrong");
-      }
-    });
+    updateCourse({ courseId: course.id, title, description });
   };
 
   const onDelete = () => {
-    startTransition(async () => {
-      try {
-        await deleteCourse(course.id);
-        toast.success("Course deleted");
-        // Redirect handled in server action
-      } catch {
-        toast.error("Something went wrong");
-      }
-    });
+    deleteCourse({ courseId: course.id });
   };
 
   const onAddChapter = () => {
-    startTransition(async () => {
-      try {
-        await createChapter(course.id, "New Chapter");
-        toast.success("Chapter created");
-        router.refresh();
-      } catch {
-        toast.error("Something went wrong");
-      }
-    });
+    createChapter({ courseId: course.id, title: "New Chapter" });
   };
 
   return (

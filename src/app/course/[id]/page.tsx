@@ -1,4 +1,4 @@
-import { db } from "@/server/db";
+import { api } from "@/trpc/server";
 import { CheckCircle, Circle } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -12,21 +12,7 @@ interface CoursePageProps {
 export default async function CoursePage({ params }: CoursePageProps) {
   const { id } = await params;
 
-  const course = await db.course.findUnique({
-    where: { id },
-    include: {
-      chapters: {
-        orderBy: { order: "asc" },
-        include: {
-          userProgress: true,
-          blocks: {
-            orderBy: { order: "asc" },
-            take: 1, // Only fetch first block for preview
-          },
-        },
-      },
-    },
-  });
+  const course = await api.course.get({ courseId: id });
 
   if (!course) {
     notFound();

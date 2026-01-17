@@ -1,5 +1,5 @@
 import { type CourseCategory } from "@/generated/prisma/client";
-import { db } from "@/server/db";
+import { api } from "@/trpc/server";
 import { PlusCircle } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -9,16 +9,8 @@ import { CourseFilter } from "@/components/course-filter";
 export default async function Home({ searchParams }: PageProps<"/">) {
   const { category } = await searchParams;
 
-  const courses = await db.course.findMany({
-    where: {
-      category: category ? (category as CourseCategory) : undefined,
-    },
-    orderBy: {
-      createdAt: "desc",
-    },
-    include: {
-      chapters: true,
-    },
+  const courses = await api.course.getAll({
+    category: category ? (category as CourseCategory) : undefined,
   });
 
   return (

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { updateChapter } from "@/server/actions/chapter";
+import { api } from "@/trpc/react";
 import {
   closestCenter,
   DndContext,
@@ -200,7 +200,9 @@ export const ChapterContentEditor = ({ chapterId, initialContent, initialTitle }
     Array.isArray(initialContent) ? (initialContent as ContentBlock[]) : []
   );
   const [activeId, setActiveId] = useState<string | null>(null);
-  const [isPending, startTransition] = useTransition();
+  // const [activeId, setActiveId] = useState<string | null>(null);
+
+  // derived isPending will be defined after mutation hook
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -258,19 +260,29 @@ export const ChapterContentEditor = ({ chapterId, initialContent, initialTitle }
     setActiveId(null);
   };
 
+  const { mutate: updateChapter, isPending: isUpdatePending } = api.chapter.update.useMutation({
+    onSuccess: () => {
+      toast.success("Chapter updated successfully");
+      setInitialBlocks(blocks);
+      router.refresh();
+    },
+    onError: () => {
+      toast.error("Failed to update chapter");
+    },
+  });
+
+  const isPending = isUpdatePending;
+
   const onSave = () => {
-    startTransition(async () => {
-      try {
-        await updateChapter(chapterId, {
-          title,
-          content: blocks,
-        });
-        toast.success("Chapter updated successfully");
-        setInitialBlocks(blocks);
-        router.refresh();
-      } catch {
-        toast.error("Failed to update chapter");
-      }
+    updateChapter({
+      chapterId: chapterId,
+      title: title,
+      content: blocks.map((b) => ({
+        id: b.id,
+        type: b.type,
+        content: b.content,
+        metadata: b.metadata,
+      })),
     });
   };
 

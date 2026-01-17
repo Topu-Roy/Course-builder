@@ -1,4 +1,4 @@
-import { db } from "@/server/db";
+import { api } from "@/trpc/server";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -15,17 +15,11 @@ interface ChapterEditPageProps {
 export default async function ChapterEditPage({ params }: ChapterEditPageProps) {
   const { id, chapterId } = await params;
 
-  const chapter = await db.chapter.findUnique({
-    where: {
-      id: chapterId,
-      courseId: id,
-    },
-    include: {
-      blocks: {
-        orderBy: { order: "asc" },
-      },
-    },
-  });
+  const chapter = await api.course.getChapter({ chapterId });
+
+  if (chapter.courseId !== id) {
+    notFound();
+  }
 
   if (!chapter) {
     notFound();

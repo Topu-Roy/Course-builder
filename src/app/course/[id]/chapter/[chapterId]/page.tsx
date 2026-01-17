@@ -1,4 +1,4 @@
-import { db } from "@/server/db";
+import { api } from "@/trpc/server";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -8,53 +8,13 @@ import { ChapterSidebar } from "@/components/chapter-sidebar";
 import { ContentBlockRenderer } from "@/components/content-block-renderer";
 import { CourseSidebar } from "@/components/course-sidebar";
 import { ToggleCompletionButton } from "@/components/toggle-completion-button";
-import { getServerSession } from "@/lib/auth";
 import { type ContentBlock } from "@/lib/types";
 
 export default async function ChapterPage({ params }: PageProps<"/course/[id]/chapter/[chapterId]">) {
   const { id, chapterId } = await params;
-  const session = await getServerSession();
+  // Session is handled in protectedProcedure
 
-  // Single query that gets all needed data including blocks
-  const chapter = await db.chapter.findUnique({
-    where: { id: chapterId },
-    select: {
-      id: true,
-      title: true,
-      order: true,
-      blocks: {
-        orderBy: { order: "asc" },
-        select: {
-          id: true,
-          type: true,
-          content: true,
-          metadata: true,
-        },
-      },
-      course: {
-        select: {
-          id: true,
-          title: true,
-          chapters: {
-            select: {
-              id: true,
-              title: true,
-              order: true,
-            },
-            orderBy: { order: "asc" },
-          },
-        },
-      },
-      userProgress: {
-        where: {
-          userId: session?.user.id,
-        },
-        select: {
-          completed: true,
-        },
-      },
-    },
-  });
+  const chapter = await api.course.getChapter({ chapterId });
 
   if (!chapter) {
     notFound();

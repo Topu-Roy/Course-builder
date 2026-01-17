@@ -5,9 +5,9 @@ export interface ContentBlock {
   type: BlockType;
   content: string;
   metadata?: {
-    caption?: string; // For images/videos
-    language?: string; // For code
-    level?: number; // For headings
-    subHeading?: string; // Keeping for backward/forward compat if needed, or just use separate blocks
-  };
+    caption?: string | null;
+    language?: string | null;
+    level?: number | null;
+    subHeading?: string | null;
+  } | null;
 }
