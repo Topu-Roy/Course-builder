@@ -4,7 +4,6 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { SidebarTrigger } from "@/components/ui/sidebar";
-import { ChapterSidebar } from "@/components/chapter-sidebar";
 import { ContentBlockRenderer } from "@/components/content-block-renderer";
 import { CourseSidebar } from "@/components/course-sidebar";
 import { ToggleCompletionButton } from "@/components/toggle-completion-button";
@@ -27,16 +26,16 @@ export default async function ChapterPage({ params }: PageProps<"/course/[id]/ch
   const nextChapter = course.chapters[currentChapterIndex + 1];
 
   // Transform blocks to ContentBlock format for the renderer
-  const contentBlocks: ContentBlock[] = chapter.blocks.map((block) => ({
+  const contentBlocks = chapter.blocks.map((block) => ({
     id: block.id,
-    type: block.type as ContentBlock["type"],
+    type: block.type,
     content: block.content,
-    metadata: block.metadata as ContentBlock["metadata"],
+    metadata: block.metadata,
   }));
 
   return (
     <>
-      <CourseSidebar courseId={course.id} chapters={course.chapters} currentChapterId={chapter.id} />
+      <CourseSidebar courseId={course.id} chapters={course.chapters} />
       <main>
         <div className="flex h-full">
           <SidebarTrigger />
@@ -54,7 +53,7 @@ export default async function ChapterPage({ params }: PageProps<"/course/[id]/ch
 
               {/* Content */}
               <div className="prose dark:prose-invert mb-10 max-w-none">
-                <ContentBlockRenderer blocks={contentBlocks} />
+                <ContentBlockRenderer blocks={contentBlocks as ContentBlock[]} />
               </div>
 
               {/* Navigation Footer */}
