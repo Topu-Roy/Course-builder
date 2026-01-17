@@ -3,7 +3,7 @@ import { api } from "@/trpc/server";
 import { PlusCircle } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { CourseCard } from "@/components/course-card";
 import { CourseFilter } from "@/components/course-filter";
 
 export default async function Home({ searchParams }: PageProps<"/">) {
@@ -39,17 +39,7 @@ export default async function Home({ searchParams }: PageProps<"/">) {
       ) : (
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
           {courses.map((course) => (
-            <Link key={course.id} href={`/course/${course.id}`}>
-              <Card className="h-full cursor-pointer transition-shadow hover:shadow-lg">
-                <CardHeader>
-                  <CardTitle className="line-clamp-2">{course.title}</CardTitle>
-                  <CardDescription className="line-clamp-3">{course.description}</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-muted-foreground text-sm">{course.chapters.length} Chapters</p>
-                </CardContent>
-              </Card>
-            </Link>
+            <CourseCard key={course.id} course={course} />
           ))}
         </div>
       )}

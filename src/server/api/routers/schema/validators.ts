@@ -92,3 +92,7 @@ export const getProgressInput = object({
     message: "Chapter ID is required",
   }),
 });
+
+export const enrollCourseInput = object({
+  courseId: string().nonempty(),
+});

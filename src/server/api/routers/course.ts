@@ -2,6 +2,7 @@ import { generateCourseOutline } from "@/server/actions/ai";
 import {
   createCourseInput,
   deleteCourseInput,
+  enrollCourseInput,
   getChapterInput,
   getCourseInput,
   getCoursesInput,
@@ -11,6 +12,7 @@ import {
 } from "@/server/api/routers/schema/validators";
 import { createTRPCRouter, protectedProcedure, publicProcedure } from "@/server/api/trpc";
 import { searchYouTubeVideo } from "@/server/lib/youtube";
+import { TRPCError } from "@trpc/server";
 import { type ContentBlock } from "@/lib/types";
 
 export const courseRouter = createTRPCRouter({
@@ -121,6 +123,22 @@ export const courseRouter = createTRPCRouter({
     return { success: true };
   }),
 
+  enroll: protectedProcedure.input(enrollCourseInput).mutation(async ({ ctx, input }) => {
+    const { courseId } = input;
+
+    await ctx.db.course.update({
+      where: { id: courseId },
+      data: {
+        students: {
+          connect: {
+            id: ctx.user.id,
+          },
+        },
+      },
+    });
+
+    return { success: true };
+  }),
   delete: protectedProcedure.input(deleteCourseInput).mutation(async ({ ctx, input }) => {
     const { courseId } = input;
 
@@ -157,10 +175,22 @@ export const courseRouter = createTRPCRouter({
       },
       include: {
         chapters: true,
+        students: {
+          where: {
+            id: ctx.user?.id,
+          },
+          select: {
+            id: true,
+          },
+        },
       },
     });
 
-    return courses;
+    return courses.map((course) => ({
+      ...course,
+      isEnrolled: course.students.length > 0,
+      students: undefined, // Hide students list
+    }));
   }),
 
   get: protectedProcedure.input(getCourseInput).query(async ({ ctx, input }) => {
@@ -210,6 +240,27 @@ export const courseRouter = createTRPCRouter({
 
     if (!course) {
       throw new Error("Course not found");
+    }
+
+    const isCreator = course.creatorId === ctx.user.id;
+    // Keep it simple: check if user is in students list (need to fetch it first or use exists query)
+    // Optimized: Check enrollment separately if needed, or include it in the query.
+    // Let's modify the query above to check enrollment efficiently.
+
+    const enrollment = await ctx.db.course.findUnique({
+      where: { id: courseId },
+      select: {
+        students: {
+          where: { id: ctx.user.id },
+          select: { id: true },
+        },
+      },
+    });
+
+    const isEnrolled = (enrollment?.students.length ?? 0) > 0;
+
+    if (!isCreator && !isEnrolled) {
+      throw new TRPCError({ code: "FORBIDDEN", message: "You must be enrolled to view this course." });
     }
 
     return course;
@@ -271,6 +322,29 @@ export const courseRouter = createTRPCRouter({
 
     if (!chapter) {
       throw new Error("Chapter not found");
+    }
+
+    // Check permissions
+    const course = await ctx.db.course.findUnique({
+      where: { id: chapter.courseId },
+      select: {
+        creatorId: true,
+        students: {
+          where: { id: ctx.user.id },
+          select: { id: true },
+        },
+      },
+    });
+
+    if (!course) {
+      throw new TRPCError({ code: "NOT_FOUND", message: "Course not found" });
+    }
+
+    const isCreator = course.creatorId === ctx.user.id;
+    const isEnrolled = course.students.length > 0;
+
+    if (!isCreator && !isEnrolled) {
+      throw new TRPCError({ code: "FORBIDDEN", message: "You must be enrolled to view this chapter." });
     }
 
     return chapter;
