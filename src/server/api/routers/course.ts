@@ -9,7 +9,7 @@ import {
   updateCourseInput,
   updateProgressInput,
 } from "@/server/api/routers/schema/validators";
-import { createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
+import { createTRPCRouter, protectedProcedure, publicProcedure } from "@/server/api/trpc";
 import { searchYouTubeVideo } from "@/server/lib/youtube";
 import { type ContentBlock } from "@/lib/types";
 
@@ -145,7 +145,7 @@ export const courseRouter = createTRPCRouter({
     return { success: true };
   }),
 
-  getAll: protectedProcedure.input(getCoursesInput.optional()).query(async ({ ctx, input }) => {
+  getAll: publicProcedure.input(getCoursesInput.optional()).query(async ({ ctx, input }) => {
     const category = input?.category;
 
     const courses = await ctx.db.course.findMany({
