@@ -96,3 +96,7 @@ export const getProgressInput = object({
 export const enrollCourseInput = object({
   courseId: string().nonempty(),
 });
+
+export const getSidebarDataInput = object({
+  courseId: string().nonempty(),
+});

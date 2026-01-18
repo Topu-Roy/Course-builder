@@ -1,5 +1,5 @@
 import { api } from "@/trpc/server";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -7,11 +7,12 @@ import { SidebarTrigger } from "@/components/ui/sidebar";
 import { ContentBlockRenderer } from "@/components/content-block-renderer";
 import { CourseSidebar } from "@/components/course-sidebar";
 import { ToggleCompletionButton } from "@/components/toggle-completion-button";
+import { getServerSession } from "@/lib/auth";
 import { type ContentBlock } from "@/lib/types";
 
 export default async function ChapterPage({ params }: PageProps<"/course/[id]/chapter/[chapterId]">) {
   const { id, chapterId } = await params;
-  // Session is handled in protectedProcedure
+  const session = await getServerSession();
 
   const chapter = await api.course.getChapter({ chapterId });
 
@@ -25,6 +26,8 @@ export default async function ChapterPage({ params }: PageProps<"/course/[id]/ch
   const prevChapter = course.chapters[currentChapterIndex - 1];
   const nextChapter = course.chapters[currentChapterIndex + 1];
 
+  const sidebarData = await api.course.getSidebarData({ courseId: id });
+
   // Transform blocks to ContentBlock format for the renderer
   const contentBlocks = chapter.blocks.map((block) => ({
     id: block.id,
@@ -35,7 +38,12 @@ export default async function ChapterPage({ params }: PageProps<"/course/[id]/ch
 
   return (
     <>
-      <CourseSidebar courseId={course.id} chapters={course.chapters} />
+      <CourseSidebar
+        courseId={course.id}
+        chapters={sidebarData.chapters}
+        title={sidebarData.title}
+        user={session?.user}
+      />
       <main>
         <div className="flex h-full">
           <SidebarTrigger />
@@ -68,19 +76,13 @@ export default async function ChapterPage({ params }: PageProps<"/course/[id]/ch
                     </Link>
                   )}
                 </div>
-
-                <ToggleCompletionButton courseId={id} chapterId={chapterId} isCompleted={isCompleted} />
-
-                <div>
-                  {nextChapter && (
-                    <Link href={`/course/${id}/chapter/${nextChapter.id}`}>
-                      <Button variant="outline">
-                        Next: {nextChapter.title}
-                        <ChevronRight className="ml-2 h-4 w-4" />
-                      </Button>
-                    </Link>
-                  )}
-                </div>
+                <ToggleCompletionButton
+                  courseId={id}
+                  chapterId={chapterId}
+                  isCompleted={isCompleted}
+                  nextChapterId={nextChapter?.id}
+                />
+                <div className="w-[150px]" /> {/* Spacer to keep center alignment or just empty div */}
               </div>
             </div>
           </div>

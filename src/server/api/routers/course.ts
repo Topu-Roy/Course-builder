@@ -7,6 +7,7 @@ import {
   getCourseInput,
   getCoursesInput,
   getProgressInput,
+  getSidebarDataInput,
   updateCourseInput,
   updateProgressInput,
 } from "@/server/api/routers/schema/validators";
@@ -353,51 +354,85 @@ export const courseRouter = createTRPCRouter({
   updateProgress: protectedProcedure.input(updateProgressInput).mutation(async ({ ctx, input }) => {
     const { chapterId, progress } = input;
 
-    const userProgress = await ctx.db.userProgress.findUnique({
+    const userProgress = await ctx.db.userProgress.upsert({
       where: {
         userId_chapterId: {
           userId: ctx.user.id,
           chapterId: chapterId,
         },
       },
-      select: {
-        progress: true,
-        completed: true,
+      update: {
+        progress: progress,
+        completed: progress === 100,
       },
-    });
-
-    if (!userProgress) {
-      // Create if not exists (upsert logic basically, or create first if logic demands)
-      // Actually usually we upsert. Let's assume we want to upsert or just update if exists.
-      // Based on original code it threw error if not found. But usually progress starts at 0.
-      // Original code:
-      /*
-        if (!userProgress) {
-          throw new Error("User progress not found");
-        }
-      */
-      // However, new logic might want to be more robust. Let's stick to original behavior but ideally upsert.
-      // The original code was throwing, I'll keep it throwing for now unless I see a reason to chang it.
-      throw new Error("User progress not found");
-    }
-
-    await ctx.db.userProgress.update({
-      where: {
-        userId_chapterId: {
-          userId: ctx.user.id,
-          chapterId: chapterId,
-        },
-      },
-      data: {
+      create: {
+        userId: ctx.user.id,
+        chapterId: chapterId,
         progress: progress,
         completed: progress === 100,
       },
       select: {
         id: true,
+        progress: true,
+        completed: true,
       },
     });
 
     return userProgress;
+  }),
+
+  getSidebarData: protectedProcedure.input(getSidebarDataInput).query(async ({ ctx, input }) => {
+    const { courseId } = input;
+
+    const course = await ctx.db.course.findUnique({
+      where: { id: courseId },
+      select: {
+        title: true,
+        creatorId: true,
+        chapters: {
+          orderBy: { order: "asc" },
+          select: {
+            id: true,
+            title: true,
+            order: true,
+            userProgress: {
+              where: {
+                userId: ctx.user.id,
+              },
+              select: {
+                completed: true,
+                progress: true,
+              },
+            },
+          },
+        },
+        students: {
+          where: { id: ctx.user.id },
+          select: { id: true },
+        },
+      },
+    });
+
+    if (!course) {
+      throw new TRPCError({ code: "NOT_FOUND", message: "Course not found" });
+    }
+
+    const isCreator = course.creatorId === ctx.user.id;
+    const isEnrolled = course.students.length > 0;
+
+    if (!isCreator && !isEnrolled) {
+      throw new TRPCError({ code: "FORBIDDEN", message: "You must be enrolled to view this course." });
+    }
+
+    return {
+      title: course.title,
+      chapters: course.chapters.map((chapter) => ({
+        id: chapter.id,
+        title: chapter.title,
+        order: chapter.order,
+        userProgress: chapter.userProgress[0] ?? { completed: false, progress: 0 },
+      })),
+    };
   }),
 
   getProgress: protectedProcedure.input(getProgressInput).query(async ({ ctx, input }) => {
