@@ -1,3 +1,4 @@
+import type { User } from "better-auth";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import {
@@ -29,23 +30,7 @@ export async function Navbar() {
         </Link>
 
         {session?.user.id ? (
-          <DropdownMenu>
-            <DropdownMenuTrigger>
-              <Avatar>
-                <AvatarFallback>CS</AvatarFallback>
-                <AvatarImage src={session.user.image ?? ""} />
-              </Avatar>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent>
-              <DropdownMenuLabel>My Account</DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem>Profile</DropdownMenuItem>
-              <DropdownMenuItem>Billing</DropdownMenuItem>
-              <DropdownMenuItem>Team</DropdownMenuItem>
-              <DropdownMenuItem>Subscription</DropdownMenuItem>
-              <SignOutButton />
-            </DropdownMenuContent>
-          </DropdownMenu>
+          <UserAvatar user={session.user} />
         ) : (
           <Link href="/auth/sign-in">
             <Button variant="ghost" size="sm">
@@ -55,5 +40,27 @@ export async function Navbar() {
         )}
       </div>
     </div>
+  );
+}
+
+export function UserAvatar({ user }: { user: User }) {
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger>
+        <Avatar>
+          <AvatarFallback>CS</AvatarFallback>
+          <AvatarImage src={user.image ?? ""} />
+        </Avatar>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent>
+        <DropdownMenuLabel>My Account</DropdownMenuLabel>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem>Profile</DropdownMenuItem>
+        <DropdownMenuItem>Billing</DropdownMenuItem>
+        <DropdownMenuItem>Team</DropdownMenuItem>
+        <DropdownMenuItem>Subscription</DropdownMenuItem>
+        <SignOutButton />
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 }

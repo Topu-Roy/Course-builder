@@ -5,19 +5,12 @@ import { notFound } from "next/navigation";
 import { ChaptersList } from "@/components/chapters-list";
 import { CourseEditor } from "@/components/course-editor";
 
-interface CourseEditPageProps {
-  params: Promise<{ id: string }>;
-}
-
-export default async function CourseEditPage({ params }: CourseEditPageProps) {
+export default async function CourseEditPage({ params }: PageProps<"/course/[id]/edit">) {
   // Await params first (Next.js 15+ requirement)
   const { id } = await params;
 
   const course = await api.course.get({ courseId: id });
-
-  if (!course) {
-    notFound();
-  }
+  if (!course) notFound();
 
   return (
     <div className="container mx-auto max-w-4xl py-10">

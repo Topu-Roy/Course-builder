@@ -1,7 +1,7 @@
 import { api } from "@/trpc/server";
 import { ChevronLeft } from "lucide-react";
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -15,27 +15,28 @@ import { Separator } from "@/components/ui/separator";
 import { SidebarInset, SidebarTrigger } from "@/components/ui/sidebar";
 import { ContentBlockRenderer } from "@/components/content-block-renderer";
 import { CourseSidebar } from "@/components/course-sidebar";
+import { UserAvatar } from "@/components/navbar";
 import { ToggleCompletionButton } from "@/components/toggle-completion-button";
 import { getServerSession } from "@/lib/auth";
 import { type ContentBlock } from "@/lib/types";
 
 export default async function ChapterPage({ params }: PageProps<"/course/[id]/chapter/[chapterId]">) {
   const { id, chapterId } = await params;
-  const session = await getServerSession();
 
-  const chapter = await api.course.getChapter({ chapterId });
+  const [session, chapter, sidebarData] = await Promise.all([
+    getServerSession(),
+    api.course.getChapter({ chapterId }),
+    api.course.getSidebarData({ courseId: id }),
+  ]);
 
-  if (!chapter) {
-    notFound();
-  }
+  if (!session) redirect("/auth/sign-in");
+  if (!chapter) notFound();
 
   const { course } = chapter;
   const isCompleted = chapter.userProgress.some((p) => p.completed);
   const currentChapterIndex = course.chapters.findIndex((c) => c.id === chapter.id);
   const prevChapter = course.chapters[currentChapterIndex - 1];
   const nextChapter = course.chapters[currentChapterIndex + 1];
-
-  const sidebarData = await api.course.getSidebarData({ courseId: id });
 
   // Transform blocks to ContentBlock format for the renderer
   const contentBlocks = chapter.blocks.map((block) => ({
@@ -54,7 +55,7 @@ export default async function ChapterPage({ params }: PageProps<"/course/[id]/ch
         user={session?.user}
       />
       <SidebarInset>
-        <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12">
+        <header className="bg-background border-border sticky top-0 flex h-14 shrink-0 items-center gap-2 border-b">
           <div className="flex items-center gap-2 px-4">
             <SidebarTrigger className="-ml-1" />
             <Separator orientation="vertical" className="mr-2 h-4" />
@@ -70,6 +71,8 @@ export default async function ChapterPage({ params }: PageProps<"/course/[id]/ch
               </BreadcrumbList>
             </Breadcrumb>
           </div>
+
+          <UserAvatar user={session?.user} />
         </header>
         <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
           <div className="container mx-auto max-w-4xl py-10">
@@ -87,7 +90,7 @@ export default async function ChapterPage({ params }: PageProps<"/course/[id]/ch
             </div>
 
             {/* Navigation Footer */}
-            <div className="flex items-center justify-between border-t pt-6">
+            <div className="flex w-full items-center justify-between border-t pt-6">
               <div>
                 {prevChapter && (
                   <Link href={`/course/${id}/chapter/${prevChapter.id}`}>
@@ -104,7 +107,6 @@ export default async function ChapterPage({ params }: PageProps<"/course/[id]/ch
                 isCompleted={isCompleted}
                 nextChapterId={nextChapter?.id}
               />
-              <div className="w-[150px]" /> {/* Spacer to keep center alignment or just empty div */}
             </div>
           </div>
         </div>

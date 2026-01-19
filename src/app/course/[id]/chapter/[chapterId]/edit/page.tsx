@@ -5,25 +5,13 @@ import { notFound } from "next/navigation";
 import { ChapterContentEditor } from "@/components/chapter-content-editor";
 import { type ContentBlock } from "@/lib/types";
 
-interface ChapterEditPageProps {
-  params: Promise<{
-    id: string;
-    chapterId: string;
-  }>;
-}
-
-export default async function ChapterEditPage({ params }: ChapterEditPageProps) {
+export default async function ChapterEditPage({ params }: PageProps<"/course/[id]/chapter/[chapterId]/edit">) {
   const { id, chapterId } = await params;
 
   const chapter = await api.course.getChapter({ chapterId });
 
-  if (chapter.courseId !== id) {
-    notFound();
-  }
-
-  if (!chapter) {
-    notFound();
-  }
+  if (chapter.courseId !== id) notFound();
+  if (!chapter) notFound();
 
   // Transform blocks to ContentBlock format for the editor
   const contentBlocks: ContentBlock[] = chapter.blocks.map((block) => ({

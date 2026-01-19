@@ -6,18 +6,11 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Navbar } from "@/components/navbar";
 
-interface CoursePageProps {
-  params: Promise<{ id: string }>;
-}
-
-export default async function CoursePage({ params }: CoursePageProps) {
+export default async function CoursePage({ params }: PageProps<"/course/[id]">) {
   const { id } = await params;
 
   const course = await api.course.get({ courseId: id });
-
-  if (!course) {
-    notFound();
-  }
+  if (!course) notFound();
 
   return (
     <>

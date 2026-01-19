@@ -32,8 +32,6 @@ export default function CreateCoursePage() {
       onChange: createCourseInput,
     },
     onSubmit: ({ value }) => {
-      console.log(value);
-
       createCourse(
         {
           topic: value.topic,

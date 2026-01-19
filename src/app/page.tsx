@@ -11,7 +11,7 @@ export default async function Home({ searchParams }: PageProps<"/">) {
   const { category } = await searchParams;
 
   const courses = await api.course.getAll({
-    category: category ? (category as CourseCategory) : undefined,
+    category: category as CourseCategory | undefined,
   });
 
   return (

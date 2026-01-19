@@ -6,9 +6,7 @@ import { getServerSession } from "@/lib/auth";
 export default async function SignInPage() {
   const session = await getServerSession();
 
-  if (session) {
-    return redirect("/");
-  }
+  if (session) redirect("/");
 
   return (
     <div className="bg-background flex min-h-screen items-center justify-center p-4">
