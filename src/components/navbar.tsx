@@ -1,19 +1,10 @@
-import type { User } from "better-auth";
+import { Suspense } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { getServerSession } from "@/lib/auth";
-import { SignOutButton } from "./auth-buttons";
-import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
+import { UserAvatar } from "./user-avatar";
 
-export async function Navbar() {
+export async function AsyncNavbar() {
   const session = await getServerSession();
 
   return (
@@ -43,24 +34,10 @@ export async function Navbar() {
   );
 }
 
-export function UserAvatar({ user }: { user: User }) {
+export function Navbar() {
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger>
-        <Avatar>
-          <AvatarFallback>CS</AvatarFallback>
-          <AvatarImage src={user.image ?? ""} />
-        </Avatar>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent>
-        <DropdownMenuLabel>My Account</DropdownMenuLabel>
-        <DropdownMenuSeparator />
-        <DropdownMenuItem>Profile</DropdownMenuItem>
-        <DropdownMenuItem>Billing</DropdownMenuItem>
-        <DropdownMenuItem>Team</DropdownMenuItem>
-        <DropdownMenuItem>Subscription</DropdownMenuItem>
-        <SignOutButton />
-      </DropdownMenuContent>
-    </DropdownMenu>
+    <Suspense fallback={"Loading..."}>
+      <AsyncNavbar />
+    </Suspense>
   );
 }
