@@ -9,7 +9,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 
-interface CourseCardProps {
+type CourseCardProps = {
   course: {
     id: string;
     title: string;
@@ -17,7 +17,7 @@ interface CourseCardProps {
     chapters: { id: string }[];
     isEnrolled: boolean;
   };
-}
+};
 
 export function CourseCard({ course }: CourseCardProps) {
   const router = useRouter();
