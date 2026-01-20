@@ -54,7 +54,7 @@ export default function CreateCoursePage() {
 
   return (
     <>
-      <Navbar />
+      {/* <Navbar /> // FIXME: Navbar is server component */}
       <div className="mx-auto w-full max-w-md pt-8">
         <Card>
           <CardHeader>
