@@ -1,10 +1,19 @@
 import { Suspense } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import { getServerSession } from "@/lib/auth";
 import { UserAvatar } from "./user-avatar";
 
-export async function AsyncNavbar() {
+export function Navbar() {
+  return (
+    <Suspense fallback={<NavbarSkeleton />}>
+      <AsyncNavbar />
+    </Suspense>
+  );
+}
+
+async function AsyncNavbar() {
   const session = await getServerSession();
 
   return (
@@ -34,10 +43,22 @@ export async function AsyncNavbar() {
   );
 }
 
-export function Navbar() {
+function NavbarSkeleton() {
   return (
-    <Suspense fallback={"Loading..."}>
-      <AsyncNavbar />
-    </Suspense>
+    <div className="bg-background flex h-full w-full items-center border-b px-6 py-4 shadow-sm">
+      <Link href="/" className="flex items-center gap-x-2 transition-opacity hover:opacity-75">
+        <h1 className="text-foreground text-xl font-bold">Course Builder</h1>
+      </Link>
+
+      <div className="ml-auto flex items-center gap-x-2">
+        <Link href="/create">
+          <Button variant="ghost" size="sm">
+            Create Course
+          </Button>
+        </Link>
+
+        <Skeleton className="h-8 w-8 rounded-full" />
+      </div>
+    </div>
   );
 }
