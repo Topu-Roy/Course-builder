@@ -1,6 +1,15 @@
 import { array, enum as enum_, number, object, string } from "zod/v4";
 import { COURSE_CATEGORIES } from "@/lib/constants";
 
+export const generateCourseOutlineInput = object({
+  topic: string().nonempty({
+    message: "Topic is required",
+  }),
+  description: string().nonempty({
+    message: "Description is required",
+  }),
+});
+
 export const createCourseInput = object({
   topic: string().nonempty({
     message: "Topic is required",
@@ -9,7 +18,32 @@ export const createCourseInput = object({
     message: "Description is required",
   }),
   category: enum_(COURSE_CATEGORIES, { message: "Select a category" }),
-  imageUrl: string(),
+  imageUrl: string().optional(),
+  chapters: array(
+    object({
+      title: string().nonempty({
+        message: "Title is required",
+      }),
+      description: string().nonempty({
+        message: "Description is required",
+      }),
+      content: array(
+        object({
+          id: string(),
+          type: enum_(["image", "code", "text", "video", "heading"]),
+          content: string(),
+          metadata: object({
+            caption: string().optional().nullable(),
+            language: string().optional().nullable(),
+            level: number().optional().nullable(),
+            subHeading: string().optional().nullable(),
+          })
+            .nullable()
+            .optional(),
+        })
+      ),
+    })
+  ),
 });
 
 export const updateCourseInput = object({

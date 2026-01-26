@@ -2,34 +2,9 @@
 
 import { google } from "@ai-sdk/google";
 import { generateObject } from "ai";
-import { z } from "zod";
+import { generateCourseOutlineSchema } from "./schema";
 
 export async function generateCourseOutline(topic: string, description: string) {
-  const schema = z.object({
-    courseTitle: z.string(),
-    courseDescription: z.string(),
-    author: z.string(),
-    chapters: z.array(
-      z.object({
-        title: z.string(),
-        description: z.string(),
-        content: z.array(
-          z.object({
-            type: z.enum(["text", "image", "video", "code", "heading"]),
-            content: z.string(),
-            metadata: z
-              .object({
-                level: z.number().optional(),
-                language: z.string().optional(),
-                caption: z.string().optional(),
-              })
-              .optional(),
-          })
-        ),
-      })
-    ),
-  });
-
   const prompt = `
     You are an expert course creator. Create a comprehensive course outline for the topic: "${topic}".
     Additional context/description: ${description}
@@ -50,7 +25,7 @@ export async function generateCourseOutline(topic: string, description: string) 
 
   const { object } = await generateObject({
     model: google("gemini-2.5-flash"),
-    schema: schema,
+    schema: generateCourseOutlineSchema,
     prompt: prompt,
   });
 

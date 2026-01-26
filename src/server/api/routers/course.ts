@@ -22,39 +22,51 @@ export const courseRouter = createTRPCRouter({
     // 1. Generate the course outline using AI
     const courseOutline = await generateCourseOutline(topic, description);
 
-    // 2. Enrich content with real YouTube videos
-    const enrichedChapters = await Promise.all(
-      courseOutline.chapters.map(async (chapter) => {
-        const enrichedBlocks: ContentBlock[] = [];
-
-        for (const block of chapter.content) {
-          // Add ID to the block
-          enrichedBlocks.push({ ...block, id: crypto.randomUUID() });
-
-          // If it's a heading, try to find a video
-          if (block.type === "heading") {
-            const searchQuery = `${topic} ${block.content}`;
-            const videoUrl = await searchYouTubeVideo(searchQuery);
-
-            if (videoUrl) {
-              enrichedBlocks.push({
-                id: crypto.randomUUID(),
-                type: "video",
-                content: videoUrl,
-                metadata: { caption: `Video related to ${block.content}` },
-              });
-            }
-          }
-        }
-
-        return {
-          ...chapter,
-          content: enrichedBlocks,
-        };
-      })
+    // 2. Identify all search tasks across all chapters
+    const searchTasks = courseOutline.chapters.flatMap((chapter, chapterIndex) =>
+      chapter.content
+        .filter((block) => block.type === "heading")
+        .map((block) => ({
+          chapterIndex,
+          content: block.content,
+          searchQuery: `${topic} ${block.content}`,
+        }))
     );
 
-    // 3. Save the course to the database
+    // 3. Search EVERYTHING in parallel
+    // This fires all YouTube requests at once
+    const searchResults = await Promise.all(
+      searchTasks.map(async (task) => ({
+        ...task,
+        videoUrl: await searchYouTubeVideo(task.searchQuery),
+      }))
+    );
+
+    // 4. Reconstruct the enriched chapters
+    const enrichedChapters = courseOutline.chapters.map((chapter, chapterIndex) => {
+      const newContent: ContentBlock[] = [];
+
+      chapter.content.forEach((block) => {
+        newContent.push({ ...block, id: crypto.randomUUID() });
+
+        // If this block was searched, find its result and inject the video
+        if (block.type === "heading") {
+          const result = searchResults.find((r) => r.chapterIndex === chapterIndex && r.content === block.content);
+          if (result?.videoUrl) {
+            newContent.push({
+              id: crypto.randomUUID(),
+              type: "video",
+              content: result.videoUrl,
+              metadata: { caption: `Video: ${block.content}` },
+            });
+          }
+        }
+      });
+
+      return { ...chapter, content: newContent };
+    });
+
+    // 5. Save the course to the database
     const course = await ctx.db.course.create({
       data: {
         creatorId: ctx.user.id,
@@ -140,6 +152,7 @@ export const courseRouter = createTRPCRouter({
 
     return { success: true };
   }),
+
   delete: protectedProcedure.input(deleteCourseInput).mutation(async ({ ctx, input }) => {
     const { courseId } = input;
 
