@@ -70,6 +70,9 @@ export const createChapterInput = object({
 });
 
 export const getChapterInput = object({
+  courseId: string().nonempty({
+    message: "Course ID is required",
+  }),
   chapterId: string().nonempty({
     message: "Chapter ID is required",
   }),

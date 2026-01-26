@@ -13,10 +13,11 @@ import {
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { SidebarInset, SidebarTrigger } from "@/components/ui/sidebar";
+import { Skeleton } from "@/components/ui/skeleton";
 import { ContentBlockRenderer } from "@/components/content-block-renderer";
 import { CourseSidebar } from "@/components/course-sidebar";
-import { UserAvatar } from "@/components/navbar";
 import { ToggleCompletionButton } from "@/components/toggle-completion-button";
+import { UserAvatar } from "@/components/user-avatar";
 import { getServerSession } from "@/lib/auth";
 import { type ContentBlock } from "@/lib/types";
 
@@ -25,7 +26,7 @@ export default async function ChapterPage({ params }: PageProps<"/course/[id]/ch
 
   const [session, chapter, sidebarData] = await Promise.all([
     getServerSession(),
-    api.course.getChapter({ chapterId }),
+    api.course.getChapter({ chapterId, courseId: id }),
     api.course.getSidebarData({ courseId: id }),
   ]);
 
@@ -33,7 +34,6 @@ export default async function ChapterPage({ params }: PageProps<"/course/[id]/ch
   if (!chapter) notFound();
 
   const { course } = chapter;
-  const isCompleted = chapter.userProgress.some((p) => p.completed);
   const currentChapterIndex = course.chapters.findIndex((c) => c.id === chapter.id);
   const prevChapter = course.chapters[currentChapterIndex - 1];
   const nextChapter = course.chapters[currentChapterIndex + 1];
@@ -101,16 +101,75 @@ export default async function ChapterPage({ params }: PageProps<"/course/[id]/ch
                   </Link>
                 )}
               </div>
-              <ToggleCompletionButton
-                courseId={id}
-                chapterId={chapterId}
-                isCompleted={isCompleted}
-                nextChapterId={nextChapter?.id}
-              />
+              <ToggleCompletionButton courseId={id} chapterId={chapterId} nextChapterId={nextChapter?.id} />
             </div>
           </div>
         </div>
       </SidebarInset>
+    </>
+  );
+}
+
+export function ChapterSkeleton() {
+  return (
+    <>
+      <header className="bg-background border-border sticky top-0 flex h-14 shrink-0 items-center justify-between gap-2 border-b px-4">
+        <div className="flex items-center gap-2">
+          {/* Menu Button Placeholder */}
+          <Skeleton className="h-8 w-8 rounded-md" />
+
+          <div className="bg-border h-4 w-px" />
+
+          {/* Breadcrumb Path */}
+          <nav className="flex items-center gap-2">
+            <Skeleton className="hidden h-4 w-[100px] md:block" />
+            <Skeleton className="hidden h-4 w-4 md:block" />
+            <Skeleton className="h-4 w-[140px]" />
+          </nav>
+        </div>
+
+        {/* Right Side Actions */}
+        <div className="flex items-center gap-3">
+          <Skeleton className="h-8 w-8 rounded-full" />
+        </div>
+      </header>
+      <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
+        <div className="container mx-auto max-w-4xl py-10">
+          {/* Breadcrumb Back */}
+          <div className="mb-8">
+            <Skeleton className="text-muted-foreground mb-4 h-4 w-[120px]" />
+            <Skeleton className="h-9 w-[70%]" />
+          </div>
+
+          {/* Prose Content Placeholder */}
+          <div className="prose dark:prose-invert mb-10 max-w-none space-y-6">
+            {/* Multiple content sections */}
+            {[1, 2, 3].map((section) => (
+              <div key={section} className="space-y-3">
+                <Skeleton className="h-6 w-[40%]" />
+                <Skeleton className="h-4 w-full" />
+                <Skeleton className="h-4 w-[96%]" />
+                <Skeleton className="h-4 w-[92%]" />
+              </div>
+            ))}
+
+            {/* Code block or media placeholder */}
+            <Skeleton className="h-32 w-full rounded-lg" />
+
+            {/* More text */}
+            <div className="space-y-3">
+              <Skeleton className="h-4 w-full" />
+              <Skeleton className="h-4 w-[85%]" />
+            </div>
+          </div>
+
+          {/* Footer Navigation */}
+          <div className="border-border flex items-center justify-between border-t pt-6">
+            <Skeleton className="h-10 w-[160px] rounded-md" />
+            <Skeleton className="h-10 w-[180px] rounded-md" />
+          </div>
+        </div>
+      </div>
     </>
   );
 }

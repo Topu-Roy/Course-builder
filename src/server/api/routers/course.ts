@@ -15,6 +15,7 @@ import { createTRPCRouter, protectedProcedure, publicProcedure } from "@/server/
 import { searchYouTubeVideo } from "@/server/lib/youtube";
 import { TRPCError } from "@trpc/server";
 import { type ContentBlock } from "@/lib/types";
+import { getCachedChapter } from "./query/getChapter";
 
 export const courseRouter = createTRPCRouter({
   createCourse: protectedProcedure.input(createCourseInput).mutation(async ({ ctx, input }) => {
@@ -281,85 +282,32 @@ export const courseRouter = createTRPCRouter({
   }),
 
   getChapter: protectedProcedure.input(getChapterInput).query(async ({ ctx, input }) => {
-    const { chapterId } = input;
-
-    const chapter = await ctx.db.chapter.findUnique({
+    const enrolled = await ctx.db.course.findFirst({
       where: {
-        id: chapterId,
+        id: input.courseId,
+        students: {
+          some: { id: ctx.user.id },
+        },
       },
       select: {
         id: true,
-        title: true,
-        order: true,
-        courseId: true,
-        blocks: {
-          orderBy: { order: "asc" },
-          select: {
-            id: true,
-            type: true,
-            content: true,
-            metadata: {
-              select: {
-                caption: true,
-                language: true,
-                level: true,
-                subHeading: true,
-              },
-            },
-            order: true,
-          },
-        },
-        course: {
-          select: {
-            id: true,
-            title: true,
-            chapters: {
-              select: {
-                id: true,
-                title: true,
-                order: true,
-              },
-              orderBy: { order: "asc" },
-            },
-          },
-        },
-        userProgress: {
-          where: {
-            userId: ctx.user.id,
-          },
-          select: {
-            completed: true,
-          },
-        },
-      },
-    });
-
-    if (!chapter) {
-      throw new Error("Chapter not found");
-    }
-
-    // Check permissions
-    const course = await ctx.db.course.findUnique({
-      where: { id: chapter.courseId },
-      select: {
         creatorId: true,
-        students: {
-          where: { id: ctx.user.id },
-          select: { id: true },
-        },
       },
     });
 
-    if (!course) {
-      throw new TRPCError({ code: "NOT_FOUND", message: "Course not found" });
+    const isCreator = enrolled?.creatorId === ctx.user.id;
+
+    if (isCreator) {
+      return await getCachedChapter({ db: ctx.db, chapterId: input.chapterId });
     }
 
-    const isCreator = course.creatorId === ctx.user.id;
-    const isEnrolled = course.students.length > 0;
-
-    if (!isCreator && !isEnrolled) {
+    if (!enrolled) {
       throw new TRPCError({ code: "FORBIDDEN", message: "You must be enrolled to view this chapter." });
     }
+
+    const chapter = await getCachedChapter({ db: ctx.db, chapterId: input.chapterId });
+
+    if (!chapter) throw new TRPCError({ code: "NOT_FOUND", message: "Chapter not found" });
 
     return chapter;
   }),
