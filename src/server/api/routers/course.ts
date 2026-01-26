@@ -298,14 +298,14 @@ export const courseRouter = createTRPCRouter({
     const isCreator = enrolled?.creatorId === ctx.user.id;
 
     if (isCreator) {
-      return await getCachedChapter({ db: ctx.db, chapterId: input.chapterId });
+      return await getCachedChapter({ chapterId: input.chapterId });
     }
 
     if (!enrolled) {
       throw new TRPCError({ code: "FORBIDDEN", message: "You must be enrolled to view this chapter." });
     }
 
-    const chapter = await getCachedChapter({ db: ctx.db, chapterId: input.chapterId });
+    const chapter = await getCachedChapter({ chapterId: input.chapterId });
 
     if (!chapter) throw new TRPCError({ code: "NOT_FOUND", message: "Chapter not found" });
 

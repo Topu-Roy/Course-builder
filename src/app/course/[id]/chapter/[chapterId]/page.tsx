@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { api } from "@/trpc/server";
 import { ChevronLeft } from "lucide-react";
 import Link from "next/link";
@@ -14,6 +15,7 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { SidebarInset, SidebarTrigger } from "@/components/ui/sidebar";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Spinner } from "@/components/ui/spinner";
 import { ContentBlockRenderer } from "@/components/content-block-renderer";
 import { CourseSidebar } from "@/components/course-sidebar";
 import { ToggleCompletionButton } from "@/components/toggle-completion-button";
@@ -21,7 +23,22 @@ import { UserAvatar } from "@/components/user-avatar";
 import { getServerSession } from "@/lib/auth";
 import { type ContentBlock } from "@/lib/types";
 
-export default async function ChapterPage({ params }: PageProps<"/course/[id]/chapter/[chapterId]">) {
+export default function Page({ params }: PageProps<"/course/[id]/chapter/[chapterId]">) {
+  return (
+    <Suspense fallback={<Spinner />}>
+      <Chapter params={params} />
+    </Suspense>
+  );
+}
+
+async function Chapter({
+  params,
+}: {
+  params: Promise<{
+    id: string;
+    chapterId: string;
+  }>;
+}) {
   const { id, chapterId } = await params;
 
   const [session, chapter, sidebarData] = await Promise.all([

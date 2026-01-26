@@ -1,7 +1,7 @@
-import { type PrismaClient } from "@/generated/prisma/client";
+import { db } from "@/server/db";
 import { cacheLife } from "next/cache";
 
-export async function getCachedChapter({ db, chapterId }: { db: PrismaClient; chapterId: string }) {
+export async function getCachedChapter({ chapterId }: { chapterId: string }) {
   "use cache";
   cacheLife("hours");
 
