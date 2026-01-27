@@ -208,6 +208,66 @@ export const courseRouter = createTRPCRouter({
     }));
   }),
 
+  getCreatedCourses: protectedProcedure.query(async ({ ctx }) => {
+    const courses = await ctx.db.course.findMany({
+      where: {
+        creatorId: ctx.user.id,
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+      include: {
+        chapters: true,
+        students: {
+          where: {
+            id: ctx.user.id,
+          },
+          select: {
+            id: true,
+          },
+        },
+      },
+    });
+
+    return courses.map((course) => ({
+      ...course,
+      isEnrolled: course.students.length > 0,
+      students: undefined,
+    }));
+  }),
+
+  getEnrolledCourses: protectedProcedure.query(async ({ ctx }) => {
+    const courses = await ctx.db.course.findMany({
+      where: {
+        students: {
+          some: {
+            id: ctx.user.id,
+          },
+        },
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+      include: {
+        chapters: true,
+        students: {
+          where: {
+            id: ctx.user.id,
+          },
+          select: {
+            id: true,
+          },
+        },
+      },
+    });
+
+    return courses.map((course) => ({
+      ...course,
+      isEnrolled: true,
+      students: undefined,
+    }));
+  }),
+
   get: protectedProcedure.input(getCourseInput).query(async ({ ctx, input }) => {
     const { courseId } = input;
 
