@@ -14,7 +14,7 @@ export default function EnrolledCoursesPage() {
       <Navbar />
       <div className="container mx-auto max-w-5xl px-4 py-10 lg:px-2 2xl:px-0">
         <div className="mb-8 flex items-center justify-between">
-          <h1 className="text-4xl font-bold">Enrolled Courses</h1>
+          <h1 className="text-2xl font-bold md:text-4xl">Enrolled Courses</h1>
           <Link href="/create">
             <Button>
               <PlusCircle className="mr-2 h-4 w-4" />

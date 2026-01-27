@@ -1,7 +1,7 @@
 "use client";
 
 import { type User } from "better-auth";
-import { Home, LogIn, Menu, PlusCircle } from "lucide-react";
+import { BookOpen, GraduationCap, Home, LogIn, Menu, PlusCircle } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
@@ -49,6 +49,22 @@ export function MobileNav({ user }: MobileNavProps) {
                 Home
               </Button>
             </Link>
+            {user && (
+              <>
+                <Link href={"/created" as any}>
+                  <Button variant="ghost" className="w-full justify-start text-base">
+                    <BookOpen className="mr-3 h-5 w-5" />
+                    Created Courses
+                  </Button>
+                </Link>
+                <Link href={"/enrolled" as any}>
+                  <Button variant="ghost" className="w-full justify-start text-base">
+                    <GraduationCap className="mr-3 h-5 w-5" />
+                    Enrolled Courses
+                  </Button>
+                </Link>
+              </>
+            )}
             <Link href="/create">
               <Button variant="ghost" className="w-full justify-start text-base">
                 <PlusCircle className="mr-3 h-5 w-5" />

@@ -35,7 +35,7 @@ async function Course({ params }: { params: Promise<{ id: string }> }) {
       {/* Course Header */}
       <div className="mb-8 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
-          <h1 className="mb-4 text-3xl font-bold md:text-4xl">{course.title}</h1>
+          <h1 className="mb-4 text-2xl font-bold md:text-4xl">{course.title}</h1>
           <p className="text-muted-foreground line-clamp-3 text-lg">{course.description}</p>
         </div>
         {isCreator ? (
