@@ -1,5 +1,7 @@
 /* eslint-disable */
 
+import { tryCatch } from "./try-catch";
+
 export async function searchYouTubeVideo(query: string): Promise<string | null> {
   const apiKey = process.env.YOUTUBE_DATA_V3_API_KEY;
 
@@ -8,7 +10,7 @@ export async function searchYouTubeVideo(query: string): Promise<string | null> 
     return null;
   }
 
-  try {
+  const { data, error } = await tryCatch(async () => {
     const searchQuery = encodeURIComponent(`${query} tutorial educational`);
     const url = `https://www.googleapis.com/youtube/v3/search?part=snippet&q=${searchQuery}&type=video&videoEmbeddable=true&maxResults=1&key=${apiKey}`;
 
@@ -27,21 +29,12 @@ export async function searchYouTubeVideo(query: string): Promise<string | null> 
     }
 
     return null;
-  } catch (error) {
+  });
+
+  if (error) {
     console.error("Error searching YouTube:", error);
     return null;
   }
-}
 
-export async function searchMultipleVideos(queries: string[]): Promise<Record<string, string | null>> {
-  const results: Record<string, string | null> = {};
-
-  // Rate limiting: process sequentially with delay
-  for (const query of queries) {
-    results[query] = await searchYouTubeVideo(query);
-    // Small delay to avoid rate limiting
-    await new Promise((resolve) => setTimeout(resolve, 100));
-  }
-
-  return results;
+  return data;
 }

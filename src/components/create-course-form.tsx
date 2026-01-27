@@ -32,7 +32,7 @@ export function CreateCourseForm() {
   const router = useRouter();
   const [category, setCategory] = useState<CourseCategory>("OTHER");
   const [outline, setOutline] = useState<z.infer<typeof generateCourseOutlineSchema> | null>(null);
-  const { data: searchResults } = useQuery({
+  const { data: searchResults, isPending: isSearching } = useQuery({
     queryKey: ["search"],
     queryFn: async () => {
       const searchTasks = outline?.chapters.flatMap((chapter, chapterIndex) =>
@@ -58,6 +58,13 @@ export function CreateCourseForm() {
   });
   const { mutate: generateCourseOutline, isPending } = api.createCourse.generateCourseOutline.useMutation();
   const { mutate: createCourse } = api.createCourse.createCourse.useMutation();
+
+  useEffect(() => {
+    if (isSearching) {
+      console.log(isSearching);
+      console.log("Searching for videos...");
+    }
+  }, [isSearching]);
 
   const form = useForm({
     defaultValues: {

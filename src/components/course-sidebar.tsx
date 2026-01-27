@@ -32,7 +32,7 @@ import { Skeleton } from "./ui/skeleton";
 type Props = {
   params: Promise<{
     id: string;
-    chapterId: string;
+    chapterId?: string;
   }>;
 };
 
