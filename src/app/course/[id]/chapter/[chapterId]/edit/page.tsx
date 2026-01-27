@@ -8,9 +8,9 @@ import { type ContentBlock } from "@/lib/types";
 export default async function ChapterEditPage({ params }: PageProps<"/course/[id]/chapter/[chapterId]/edit">) {
   const { id, chapterId } = await params;
 
-  const chapter = await api.course.getChapter({ chapterId });
+  const chapter = await api.course.getChapter({ courseId: id, chapterId });
 
-  if (chapter.courseId !== id) notFound();
+  if (chapter?.courseId !== id) notFound();
   if (!chapter) notFound();
 
   // Transform blocks to ContentBlock format for the editor
@@ -22,7 +22,7 @@ export default async function ChapterEditPage({ params }: PageProps<"/course/[id
   }));
 
   return (
-    <div className="container mx-auto max-w-4xl py-10">
+    <div className="container mx-auto max-w-4xl px-4 py-10 lg:px-2 2xl:px-0">
       <div className="mb-6">
         <Link
           href={`/course/${id}/edit`}
