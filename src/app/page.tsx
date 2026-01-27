@@ -11,8 +11,6 @@ import { CourseFilter } from "@/components/course-filter";
 import { Navbar } from "@/components/navbar";
 
 export default async function Home({ searchParams }: PageProps<"/">) {
-  const { category } = await searchParams;
-
   return (
     <>
       <Navbar />
@@ -20,7 +18,9 @@ export default async function Home({ searchParams }: PageProps<"/">) {
         <div className="mb-8 flex items-center justify-between">
           <h1 className="text-4xl font-bold">All Courses</h1>
           <div className="flex items-center gap-4">
-            <CourseFilter />
+            <Suspense fallback={<Skeleton className="h-8 w-20" />}>
+              <CourseFilter />
+            </Suspense>
             <Link href="/create">
               <Button>
                 <PlusCircle className="mr-2 h-4 w-4" />
@@ -31,16 +31,22 @@ export default async function Home({ searchParams }: PageProps<"/">) {
         </div>
 
         <Suspense fallback={<CourseGridSkeleton />}>
-          <CourseCards category={category as CourseCategory | undefined} />
+          <CourseCards searchParams={searchParams} />
         </Suspense>
       </div>
     </>
   );
 }
 
-async function CourseCards({ category }: { category: CourseCategory | undefined }) {
+async function CourseCards({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
+  const { category } = await searchParams;
+
   const courses = await api.course.getAll({
-    category,
+    category: category as CourseCategory | undefined,
   });
 
   return (
