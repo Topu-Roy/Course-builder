@@ -104,7 +104,7 @@ async function Chapter({
           <div className="flex w-full flex-col-reverse items-center justify-between gap-4 border-t pt-6 md:flex-row">
             <div>
               {prevChapter && (
-                <Link href={`/course/${id}/chapter/${prevChapter.id}`}>
+                <Link href={`/course/${id}/chapter/${prevChapter.id}/view`}>
                   <Button variant="outline">
                     <ChevronLeft className="mr-2 h-4 w-4" />
                     Previous: {prevChapter.title}

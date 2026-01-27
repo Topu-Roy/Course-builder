@@ -127,7 +127,7 @@ export const ChapterSidebar = ({ courseId, chapters, currentChapterId }: Chapter
             return (
               <Link
                 key={chapter.id}
-                href={`/course/${courseId}/chapter/${chapter.id}`}
+                href={`/course/${courseId}/chapter/${chapter.id}/view`}
                 className={cn(
                   "relative flex items-center gap-x-2 pl-6 text-sm font-medium text-slate-500 transition-all hover:bg-slate-300/20 hover:text-slate-600",
                   isActive && "bg-slate-200/20 text-slate-700 hover:bg-slate-200/20 hover:text-slate-700",

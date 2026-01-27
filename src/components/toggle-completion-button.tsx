@@ -27,7 +27,7 @@ export function ToggleCompletionButton({ courseId, chapterId, nextChapterId }: T
       router.refresh();
 
       if (data.completed && nextChapterId) {
-        router.push(`/course/${courseId}/chapter/${nextChapterId}`);
+        router.push(`/course/${courseId}/chapter/${nextChapterId}/view`);
       }
 
       toast.success(data.completed ? "Chapter completed!" : "Progress reset");
@@ -41,7 +41,7 @@ export function ToggleCompletionButton({ courseId, chapterId, nextChapterId }: T
 
   const handleToggle = () => {
     if (progress?.completed && nextChapterId) {
-      router.push(`/course/${courseId}/chapter/${nextChapterId}`);
+      router.push(`/course/${courseId}/chapter/${nextChapterId}/view`);
       return;
     }
 
