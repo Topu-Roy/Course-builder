@@ -24,7 +24,7 @@ export function MobileNav({ user }: MobileNavProps) {
       </SheetTrigger>
       <SheetContent side="right" className="w-[300px] sm:w-[400px]">
         <SheetHeader>
-          <SheetTitle className="flex items-center gap-2 text-left">
+          <SheetTitle className="flex items-center gap-2 pl-2 text-left">
             <span className="font-bold">Course Builder</span>
           </SheetTitle>
         </SheetHeader>

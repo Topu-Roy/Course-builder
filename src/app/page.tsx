@@ -14,9 +14,9 @@ export default async function Home({ searchParams }: PageProps<"/">) {
   return (
     <>
       <Navbar />
-      <div className="container mx-auto max-w-5xl py-10">
+      <div className="container mx-auto max-w-5xl px-4 py-10 lg:px-2 2xl:px-0">
         <div className="mb-8 flex flex-col items-start gap-4 md:flex-row md:items-center md:justify-between">
-          <h1 className="text-4xl font-bold">All Courses</h1>
+          <h1 className="text-2xl font-bold md:text-3xl">All Courses</h1>
           <div className="flex w-full flex-col gap-4 sm:flex-row sm:items-center md:w-auto">
             <Suspense fallback={<Skeleton className="h-10 w-full sm:w-[200px]" />}>
               <CourseFilter />

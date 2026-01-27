@@ -18,7 +18,7 @@ async function AsyncNavbar() {
   const session = await getServerSession();
 
   return (
-    <div className="bg-background flex h-full w-full items-center border-b px-6 py-4 shadow-sm">
+    <div className="bg-background flex h-full w-full items-center border-b px-4 py-4 shadow-sm lg:px-6">
       <Link href="/" className="flex items-center gap-x-2 transition-opacity hover:opacity-75">
         <h1 className="text-foreground text-xl font-bold">Course Builder</h1>
       </Link>
@@ -50,7 +50,7 @@ async function AsyncNavbar() {
 
 function NavbarSkeleton() {
   return (
-    <div className="bg-background flex h-full w-full items-center border-b px-6 py-4 shadow-sm">
+    <div className="bg-background flex h-full w-full items-center border-b px-4 py-4 shadow-sm lg:px-6">
       <Link href="/" className="flex items-center gap-x-2 transition-opacity hover:opacity-75">
         <h1 className="text-foreground text-xl font-bold">Course Builder</h1>
       </Link>

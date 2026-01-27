@@ -28,14 +28,14 @@ async function Course({ params }: { params: Promise<{ id: string }> }) {
   const { course, isCreator } = data;
 
   return (
-    <div className="container mx-auto max-w-4xl py-10">
+    <div className="container mx-auto max-w-4xl px-4 py-10 lg:px-2 2xl:px-0">
       <div className="mb-4 px-2 md:hidden">
         <SidebarTrigger />
       </div>
       {/* Course Header */}
       <div className="mb-8 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
-          <h1 className="mb-4 text-4xl font-bold">{course.title}</h1>
+          <h1 className="mb-4 text-3xl font-bold md:text-4xl">{course.title}</h1>
           <p className="text-muted-foreground line-clamp-3 text-lg">{course.description}</p>
         </div>
         {isCreator ? (

@@ -12,7 +12,7 @@ export default function CreatedCoursesPage() {
   return (
     <>
       <Navbar />
-      <div className="container mx-auto max-w-5xl py-10">
+      <div className="container mx-auto max-w-5xl px-4 py-10 lg:px-2 2xl:px-0">
         <div className="mb-8 flex items-center justify-between">
           <h1 className="text-4xl font-bold">Created Courses</h1>
           <Link href="/create">

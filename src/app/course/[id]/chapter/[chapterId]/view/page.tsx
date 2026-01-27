@@ -86,13 +86,13 @@ async function Chapter({
       </header>
 
       <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
-        <div className="container mx-auto max-w-4xl py-10">
+        <div className="container mx-auto max-w-4xl px-4 py-10 lg:px-2 2xl:px-0">
           {/* Header */}
           <div className="mb-8">
             <Link href={`/course/${id}`} className="text-muted-foreground mb-4 block text-sm hover:underline">
               &larr; Back to Course
             </Link>
-            <h1 className="mb-2 text-3xl font-bold">{chapter.title}</h1>
+            <h1 className="mb-2 text-2xl font-bold md:text-3xl">{chapter.title}</h1>
           </div>
 
           {/* Content */}

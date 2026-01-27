@@ -6,7 +6,7 @@ export default function CreateCoursePage() {
   return (
     <>
       <Navbar />
-      <div className="mx-auto w-full max-w-md pt-8">
+      <div className="mx-auto w-full max-w-md px-4 pt-8 lg:px-2 2xl:px-0">
         <Card>
           <CardHeader>
             <CardTitle>Create a New Course</CardTitle>
