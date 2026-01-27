@@ -29,13 +29,14 @@ import { getServerSession } from "@/lib/auth";
 import { CourseSidebarButton } from "./course-sidebar-button";
 import { Skeleton } from "./ui/skeleton";
 
-type ChapterSidebarProps = {
+type Props = {
   params: Promise<{
     id: string;
+    chapterId: string;
   }>;
 };
 
-export async function CourseSidebar({ params }: ChapterSidebarProps) {
+export async function CourseSidebar({ params }: Props) {
   const { id } = await params;
   const [session, data] = await Promise.all([getServerSession(), api.course.getSidebarData({ courseId: id })]);
 

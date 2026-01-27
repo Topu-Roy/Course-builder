@@ -13,21 +13,17 @@ import {
 } from "@/components/ui/breadcrumb";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { SidebarInset, SidebarTrigger } from "@/components/ui/sidebar";
+import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ContentBlockRenderer } from "@/components/content-block-renderer";
-import { CourseSidebar, CourseSidebarSkeleton } from "@/components/course-sidebar";
 import { ToggleCompletionButton } from "@/components/toggle-completion-button";
 import { UserAvatar } from "@/components/user-avatar";
 import { getServerSession } from "@/lib/auth";
 import { type ContentBlock } from "@/lib/types";
 
-export default function Page({ params }: PageProps<"/course/[id]/chapter/[chapterId]">) {
+export default function Page({ params }: PageProps<"/course/[id]/chapter/[chapterId]/view">) {
   return (
     <>
-      <Suspense fallback={<CourseSidebarSkeleton />}>
-        <CourseSidebar params={params} />
-      </Suspense>
       <Suspense fallback={<ChapterSkeleton />}>
         <Chapter params={params} />
       </Suspense>
@@ -68,7 +64,7 @@ async function Chapter({
   }));
 
   return (
-    <SidebarInset>
+    <>
       <header className="bg-background border-border sticky top-0 flex h-14 shrink-0 items-center justify-between gap-2 border-b pr-4">
         <div className="flex items-center gap-2 px-4">
           <SidebarTrigger className="-ml-1" />
@@ -88,6 +84,7 @@ async function Chapter({
 
         <UserAvatar user={session?.user} />
       </header>
+
       <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
         <div className="container mx-auto max-w-4xl py-10">
           {/* Header */}
@@ -119,13 +116,13 @@ async function Chapter({
           </div>
         </div>
       </div>
-    </SidebarInset>
+    </>
   );
 }
 
 function ChapterSkeleton() {
   return (
-    <SidebarInset>
+    <>
       <header className="bg-background border-border sticky top-0 flex h-14 w-full shrink-0 items-center justify-between gap-2 border-b px-4">
         <div className="flex items-center gap-2">
           {/* Menu Button Placeholder */}
@@ -184,6 +181,6 @@ function ChapterSkeleton() {
           </div>
         </div>
       </div>
-    </SidebarInset>
+    </>
   );
 }

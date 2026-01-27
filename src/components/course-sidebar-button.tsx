@@ -157,7 +157,7 @@ export function CourseSidebarButton({ chapterId, courseId, chapter, progress }: 
 
   return (
     <SidebarMenuButton>
-      <Link href={`/course/${courseId}/chapter/${chapterId}`} className="flex w-full items-center gap-2">
+      <Link href={`/course/${courseId}/chapter/${chapterId}/view`} className="flex w-full items-center gap-2">
         {progress.progress === 100 ? (
           <CheckCircle className="size-4" />
         ) : (

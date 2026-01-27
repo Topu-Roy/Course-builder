@@ -9,20 +9,20 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Navbar } from "@/components/navbar";
 
-export default async function CoursePage({ params }: PageProps<"/course/[id]">) {
-  const { id } = await params;
-
+export default async function CoursePage(props: PageProps<"/course/[id]">) {
   return (
     <>
       <Navbar />
       <Suspense fallback={<CourseSkeleton />}>
-        <Course id={id} />
+        <Course params={props.params} />
       </Suspense>
     </>
   );
 }
 
-async function Course({ id }: { id: string }) {
+async function Course({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+
   const data = await api.course.getCourseChapters({ courseId: id });
   if (!data.course) notFound();
 
@@ -50,7 +50,7 @@ async function Course({ id }: { id: string }) {
 
           return (
             <Card key={chapter.id}>
-              <Link href={`/course/${course.id}/chapter/${chapter.id}`}>
+              <Link href={`/course/${course.id}/chapter/${chapter.id}/view`}>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 hover:underline">
                   <CardTitle className="text-xl font-medium">{chapter.title}</CardTitle>
                   {isCompleted ? (
