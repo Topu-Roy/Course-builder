@@ -281,6 +281,79 @@ export const courseRouter = createTRPCRouter({
     return course;
   }),
 
+  getCourseChapters: protectedProcedure.input(getCourseInput).query(async ({ ctx, input }) => {
+    const { courseId } = input;
+
+    const course = await ctx.db.course.findUnique({
+      where: { id: courseId },
+      select: {
+        id: true,
+        title: true,
+        creatorId: true,
+        description: true,
+        chapters: {
+          orderBy: { order: "asc" },
+          select: {
+            id: true,
+            title: true,
+            order: true,
+            userProgress: {
+              where: {
+                userId: ctx.user.id,
+              },
+              select: {
+                chapter: {
+                  select: {
+                    id: true,
+                  },
+                },
+                completed: true,
+              },
+            },
+            blocks: {
+              where: {
+                type: {
+                  in: ["heading"],
+                },
+              },
+              orderBy: { order: "asc" },
+              select: {
+                id: true,
+                content: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    if (!course) {
+      throw new TRPCError({ code: "NOT_FOUND", message: "Course not found" });
+    }
+
+    const isCreator = course.creatorId === ctx.user.id;
+
+    const enrollment = await ctx.db.course.findUnique({
+      where: {
+        id: courseId,
+        students: {
+          some: { id: ctx.user.id },
+        },
+      },
+      select: {
+        id: true,
+      },
+    });
+
+    const isEnrolled = enrollment?.id;
+
+    if (!isCreator && !isEnrolled) {
+      throw new TRPCError({ code: "FORBIDDEN", message: "You must be enrolled to view this course." });
+    }
+
+    return { course, isCreator };
+  }),
+
   getChapter: protectedProcedure.input(getChapterInput).query(async ({ ctx, input }) => {
     const enrolled = await ctx.db.course.findFirst({
       where: {

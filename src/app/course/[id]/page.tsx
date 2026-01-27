@@ -3,6 +3,7 @@ import { api } from "@/trpc/server";
 import { CheckCircle, Circle } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -22,8 +23,10 @@ export default async function CoursePage({ params }: PageProps<"/course/[id]">) 
 }
 
 async function Course({ id }: { id: string }) {
-  const course = await api.course.get({ courseId: id });
-  if (!course) notFound();
+  const data = await api.course.getCourseChapters({ courseId: id });
+  if (!data.course) notFound();
+
+  const { course, isCreator } = data;
 
   return (
     <div className="container mx-auto max-w-4xl py-10">
@@ -31,24 +34,24 @@ async function Course({ id }: { id: string }) {
       <div className="mb-8 flex items-center justify-between">
         <div>
           <h1 className="mb-4 text-4xl font-bold">{course.title}</h1>
-          <p className="text-muted-foreground text-lg">{course.description}</p>
+          <p className="text-muted-foreground line-clamp-3 text-lg">{course.description}</p>
         </div>
-        <Link href={`/course/${course.id}/edit`}>
-          <Button variant="outline">Edit Course</Button>
-        </Link>
+        {isCreator ? (
+          <Link href={`/course/${course.id}/edit`}>
+            <Button variant="outline">Edit Course</Button>
+          </Link>
+        ) : null}
       </div>
 
       {/* Chapter List */}
       <div className="grid gap-4">
         {course.chapters.map((chapter) => {
-          const isCompleted = chapter.userProgress.some((p) => p.completed && p.userId === "user-1");
-          const firstBlock = chapter.blocks[0];
-          const preview = firstBlock?.content ?? "Click to view chapter content";
+          const isCompleted = chapter.userProgress.some((p) => p.completed && p.chapter.id === chapter.id);
 
           return (
-            <Link key={chapter.id} href={`/course/${course.id}/chapter/${chapter.id}`}>
-              <Card className="hover:bg-accent cursor-pointer transition-colors">
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <Card key={chapter.id}>
+              <Link href={`/course/${course.id}/chapter/${chapter.id}`}>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 hover:underline">
                   <CardTitle className="text-xl font-medium">{chapter.title}</CardTitle>
                   {isCompleted ? (
                     <CheckCircle className="h-6 w-6 text-green-500" />
@@ -56,11 +59,18 @@ async function Course({ id }: { id: string }) {
                     <Circle className="text-muted-foreground h-6 w-6" />
                   )}
                 </CardHeader>
-                <CardContent>
-                  <p className="text-muted-foreground line-clamp-2 text-sm">{preview}</p>
-                </CardContent>
-              </Card>
-            </Link>
+              </Link>
+              <CardContent>
+                <Accordion type="single" collapsible className="w-full">
+                  <AccordionItem value={chapter.title}>
+                    <AccordionTrigger>Lessons ({chapter.blocks.length})</AccordionTrigger>
+                    {chapter.blocks.map((block) => (
+                      <AccordionContent key={block.id}>{block.content}</AccordionContent>
+                    ))}
+                  </AccordionItem>
+                </Accordion>
+              </CardContent>
+            </Card>
           );
         })}
       </div>
