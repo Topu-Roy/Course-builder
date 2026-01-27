@@ -1,6 +1,8 @@
 import { generateCourseOutline } from "@/server/actions/ai";
 import { createCourseInput, generateCourseOutlineInput } from "@/server/api/routers/schema/validators";
 import { createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
+import { searchYouTubeVideo } from "@/server/lib/youtube";
+import { z } from "zod";
 
 export const createCourseRouter = createTRPCRouter({
   generateCourseOutline: protectedProcedure.input(generateCourseOutlineInput).mutation(async ({ input }) => {
@@ -53,4 +55,27 @@ export const createCourseRouter = createTRPCRouter({
 
     return course;
   }),
+
+  searchRelatedVideos: protectedProcedure
+    .input(
+      z.array(
+        z.object({
+          chapterIndex: z.number(),
+          content: z.string(),
+          searchQuery: z.string(),
+        })
+      )
+    )
+    .mutation(async ({ input }) => {
+      const results = await Promise.all(
+        input.map(async (task) => {
+          const videoUrl = await searchYouTubeVideo(task.searchQuery);
+          return {
+            ...task,
+            videoUrl,
+          };
+        })
+      );
+      return results;
+    }),
 });

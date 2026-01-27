@@ -2,10 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { useForm } from "@tanstack/react-form";
-import { useQuery } from "@tanstack/react-query";
 import type { CourseCategory } from "@/generated/prisma/enums";
 import { type generateCourseOutlineSchema } from "@/server/actions/schema";
-import { searchYouTubeVideo } from "@/server/lib/youtube";
 import { api } from "@/trpc/react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
@@ -32,30 +30,29 @@ export function CreateCourseForm() {
   const router = useRouter();
   const [category, setCategory] = useState<CourseCategory>("OTHER");
   const [outline, setOutline] = useState<z.infer<typeof generateCourseOutlineSchema> | null>(null);
-  const { data: searchResults, isPending: isSearching } = useQuery({
-    queryKey: ["search"],
-    queryFn: async () => {
-      const searchTasks = outline?.chapters.flatMap((chapter, chapterIndex) =>
-        chapter.content
-          .filter((block) => block.type === "heading")
-          .map((block) => ({
-            chapterIndex,
-            content: block.content,
-            searchQuery: `${chapter.title} ${block.content}`,
-          }))
-      );
+  const {
+    mutate: searchRelatedVideos,
+    data: searchResults,
+    isPending: isSearching,
+  } = api.createCourse.searchRelatedVideos.useMutation();
 
-      if (!searchTasks) return [];
+  useEffect(() => {
+    if (!outline) return;
 
-      return Promise.all(
-        searchTasks.map(async (task) => ({
-          ...task,
-          videoUrl: await searchYouTubeVideo(task.searchQuery),
+    const searchTasks = outline.chapters.flatMap((chapter, chapterIndex) =>
+      chapter.content
+        .filter((block) => block.type === "heading")
+        .map((block) => ({
+          chapterIndex,
+          content: block.content,
+          searchQuery: `${chapter.title} ${block.content}`,
         }))
-      );
-    },
-    enabled: !!outline,
-  });
+    );
+
+    if (searchTasks.length > 0) {
+      searchRelatedVideos(searchTasks);
+    }
+  }, [outline, searchRelatedVideos]);
   const { mutate: generateCourseOutline, isPending } = api.createCourse.generateCourseOutline.useMutation();
   const { mutate: createCourse } = api.createCourse.createCourse.useMutation();
 
