@@ -1,11 +1,28 @@
+import { Suspense } from "react";
 import { api } from "@/trpc/server";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { Skeleton } from "@/components/ui/skeleton";
 import { ChapterContentEditor } from "@/components/chapter-content-editor";
 import { type ContentBlock } from "@/lib/types";
 
 export default async function ChapterEditPage({ params }: PageProps<"/course/[id]/chapter/[chapterId]/edit">) {
+  return (
+    <Suspense fallback={<ChapterEditSkeleton />}>
+      <ChapterEdit params={params} />
+    </Suspense>
+  );
+}
+
+async function ChapterEdit({
+  params,
+}: {
+  params: Promise<{
+    id: string;
+    chapterId: string;
+  }>;
+}) {
   const { id, chapterId } = await params;
 
   const chapter = await api.course.getChapter({ courseId: id, chapterId });
@@ -34,6 +51,19 @@ export default async function ChapterEditPage({ params }: PageProps<"/course/[id
       </div>
 
       <ChapterContentEditor chapterId={chapter.id} initialTitle={chapter.title} initialContent={contentBlocks} />
+    </div>
+  );
+}
+
+async function ChapterEditSkeleton() {
+  return (
+    <div className="container mx-auto max-w-4xl px-4 py-10 lg:px-2 2xl:px-0">
+      <div className="mb-6">
+        <Skeleton className="h-4 w-48" />
+      </div>
+      <Skeleton className="h-10 w-full" />
+      <Skeleton className="h-10 w-full" />
+      <Skeleton className="h-10 w-full" />
     </div>
   );
 }
