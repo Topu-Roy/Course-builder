@@ -35,7 +35,7 @@ export function UserAvatar({ user }: { user: User }) {
         <DropdownMenuItem>Team</DropdownMenuItem>
         <DropdownMenuItem>Subscription</DropdownMenuItem>
         <DropdownMenuSeparator />
-        <SignOutButton />
+        <SignOutButton as="menu-item" />
       </DropdownMenuContent>
     </DropdownMenu>
   );

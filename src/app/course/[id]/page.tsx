@@ -6,13 +6,12 @@ import { notFound } from "next/navigation";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Navbar } from "@/components/navbar";
 
 export default async function CoursePage(props: PageProps<"/course/[id]">) {
   return (
     <>
-      <Navbar />
       <Suspense fallback={<CourseSkeleton />}>
         <Course params={props.params} />
       </Suspense>
@@ -30,15 +29,20 @@ async function Course({ params }: { params: Promise<{ id: string }> }) {
 
   return (
     <div className="container mx-auto max-w-4xl py-10">
+      <div className="mb-4 px-2 md:hidden">
+        <SidebarTrigger />
+      </div>
       {/* Course Header */}
-      <div className="mb-8 flex items-center justify-between">
+      <div className="mb-8 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
           <h1 className="mb-4 text-4xl font-bold">{course.title}</h1>
           <p className="text-muted-foreground line-clamp-3 text-lg">{course.description}</p>
         </div>
         {isCreator ? (
-          <Link href={`/course/${course.id}/edit`}>
-            <Button variant="outline">Edit Course</Button>
+          <Link href={`/course/${course.id}/edit`} className="w-full md:w-auto">
+            <Button variant="outline" className="w-full md:w-auto">
+              Edit Course
+            </Button>
           </Link>
         ) : null}
       </div>

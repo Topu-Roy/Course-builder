@@ -2,6 +2,7 @@ import { Suspense } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { MobileNav } from "@/components/mobile-nav";
 import { getServerSession } from "@/lib/auth";
 import { UserAvatar } from "./user-avatar";
 
@@ -22,7 +23,11 @@ async function AsyncNavbar() {
         <h1 className="text-foreground text-xl font-bold">Course Builder</h1>
       </Link>
 
-      <div className="ml-auto flex items-center gap-x-2">
+      <div className="ml-auto md:hidden">
+        <MobileNav user={session?.user} />
+      </div>
+
+      <div className="ml-auto hidden items-center gap-x-2 md:flex">
         <Link href="/create">
           <Button variant="ghost" size="sm">
             Create Course

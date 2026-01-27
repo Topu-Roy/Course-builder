@@ -15,14 +15,14 @@ export default async function Home({ searchParams }: PageProps<"/">) {
     <>
       <Navbar />
       <div className="container mx-auto max-w-5xl py-10">
-        <div className="mb-8 flex items-center justify-between">
+        <div className="mb-8 flex flex-col items-start gap-4 md:flex-row md:items-center md:justify-between">
           <h1 className="text-4xl font-bold">All Courses</h1>
-          <div className="flex items-center gap-4">
-            <Suspense fallback={<Skeleton className="h-8 w-20" />}>
+          <div className="flex w-full flex-col gap-4 sm:flex-row sm:items-center md:w-auto">
+            <Suspense fallback={<Skeleton className="h-10 w-full sm:w-[200px]" />}>
               <CourseFilter />
             </Suspense>
-            <Link href="/create">
-              <Button>
+            <Link href="/create" className="w-full sm:w-auto">
+              <Button className="w-full sm:w-auto">
                 <PlusCircle className="mr-2 h-4 w-4" />
                 Create Course
               </Button>

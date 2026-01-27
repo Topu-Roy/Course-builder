@@ -1,6 +1,7 @@
 import { Suspense } from "react";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { CourseSidebar, CourseSidebarSkeleton } from "@/components/course-sidebar";
+import { Navbar } from "@/components/navbar";
 
 export default function CourseLayout({
   children,
@@ -14,7 +15,10 @@ export default function CourseLayout({
       <Suspense fallback={<CourseSidebarSkeleton />}>
         <CourseSidebar params={params} />
       </Suspense>
-      <SidebarInset>{children}</SidebarInset>
+      <SidebarInset>
+        <Navbar />
+        {children}
+      </SidebarInset>
     </SidebarProvider>
   );
 }

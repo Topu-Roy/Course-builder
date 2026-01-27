@@ -101,7 +101,7 @@ async function Chapter({
           </div>
 
           {/* Navigation Footer */}
-          <div className="flex w-full items-center justify-between border-t pt-6">
+          <div className="flex w-full flex-col-reverse items-center justify-between gap-4 border-t pt-6 md:flex-row">
             <div>
               {prevChapter && (
                 <Link href={`/course/${id}/chapter/${prevChapter.id}`}>

@@ -43,7 +43,7 @@ export function SignInWithGithubButton() {
   );
 }
 
-export function SignOutButton() {
+export function SignOutButton({ as }: { as: "button" | "menu-item" }) {
   const router = useRouter();
   const { mutate, isPending } = useMutation({
     mutationFn: () => authClient.signOut(),
@@ -61,8 +61,16 @@ export function SignOutButton() {
   }
 
   return (
-    <DropdownMenuItem variant={"destructive"} onClick={handleClick} disabled={isPending}>
-      {isPending ? <Spinner /> : "Sign Out"}
-    </DropdownMenuItem>
+    <>
+      {as === "menu-item" ? (
+        <DropdownMenuItem variant={"destructive"} onClick={handleClick} disabled={isPending}>
+          {isPending ? <Spinner /> : "Sign Out"}
+        </DropdownMenuItem>
+      ) : (
+        <Button onClick={handleClick} disabled={isPending}>
+          {isPending ? <Spinner /> : "Sign Out"}
+        </Button>
+      )}
+    </>
   );
 }

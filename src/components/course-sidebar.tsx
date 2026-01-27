@@ -134,7 +134,7 @@ export async function CourseSidebar({ params }: Props) {
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <SignOutButton />
+                <SignOutButton as="menu-item" />
               </DropdownMenuContent>
             </DropdownMenu>
           </SidebarMenuItem>
