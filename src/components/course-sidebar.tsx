@@ -1,3 +1,4 @@
+import { api } from "@/trpc/server";
 import { ChevronsUpDown, GraduationCap, Home, Search } from "lucide-react";
 import Link from "next/link";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -24,26 +25,22 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
 import { SignOutButton } from "@/components/auth-buttons";
+import { getServerSession } from "@/lib/auth";
 import { CourseSidebarButton } from "./course-sidebar-button";
+import { Skeleton } from "./ui/skeleton";
 
 type ChapterSidebarProps = {
-  courseId: string;
-  chapters: {
+  params: Promise<{
     id: string;
-    title: string;
-    order: number;
-    userProgress: { completed: boolean; progress: number };
-  }[];
-  title: string;
-  user?: {
-    name?: string | null;
-    image?: string | null;
-    email?: string | null;
-  };
+  }>;
 };
 
-export function CourseSidebar({ courseId, chapters, title, user }: ChapterSidebarProps) {
-  const sortedChapters = chapters.sort((a, b) => a.order - b.order);
+export async function CourseSidebar({ params }: ChapterSidebarProps) {
+  const { id } = await params;
+  const [session, data] = await Promise.all([getServerSession(), api.course.getSidebarData({ courseId: id })]);
+
+  const sortedChapters = data.chapters.sort((a, b) => a.order - b.order);
+  const user = session?.user;
 
   return (
     <Sidebar>
@@ -51,12 +48,12 @@ export function CourseSidebar({ courseId, chapters, title, user }: ChapterSideba
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" asChild>
-              <Link href={`/course/${courseId}`}>
+              <Link href={`/course/${id}`}>
                 <div className="bg-sidebar-primary text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg">
                   <GraduationCap className="size-4" />
                 </div>
                 <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-semibold">{title}</span>
+                  <span className="truncate font-semibold">{data.title}</span>
                   <span className="truncate text-xs">Course Overview</span>
                 </div>
               </Link>
@@ -81,7 +78,7 @@ export function CourseSidebar({ courseId, chapters, title, user }: ChapterSideba
               <SidebarMenuItem key={chapter.id}>
                 <CourseSidebarButton
                   chapterId={chapter.id}
-                  courseId={courseId}
+                  courseId={id}
                   chapter={{ title: chapter.title }}
                   progress={chapter.userProgress}
                 />
@@ -139,6 +136,57 @@ export function CourseSidebar({ courseId, chapters, title, user }: ChapterSideba
                 <SignOutButton />
               </DropdownMenuContent>
             </DropdownMenu>
+          </SidebarMenuItem>
+        </SidebarMenu>
+      </SidebarFooter>
+    </Sidebar>
+  );
+}
+
+export function CourseSidebarSkeleton() {
+  return (
+    <Sidebar>
+      <SidebarHeader>
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton size="lg" disabled>
+              <Skeleton className="bg-sidebar-primary size-8 rounded-lg" />
+              <div className="grid flex-1 gap-1 text-left">
+                <Skeleton className="h-4 w-24" />
+                <Skeleton className="h-3 w-16" />
+              </div>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        </SidebarMenu>
+
+        <SidebarGroup className="py-0">
+          <SidebarGroupContent className="relative">
+            <Skeleton className="h-9 w-full" />
+            <Search className="pointer-events-none absolute top-1/2 left-2 size-4 -translate-y-1/2 opacity-50 select-none" />
+          </SidebarGroupContent>
+        </SidebarGroup>
+      </SidebarHeader>
+
+      <SidebarContent>
+        <SidebarGroup>
+          <SidebarGroupLabel>Chapters</SidebarGroupLabel>
+          <SidebarMenu className="space-y-2">
+            {/* Use SidebarMenuSkeleton for chapter items - this is the recommended pattern */}
+            {Array.from({ length: 10 }).map((_, index) => (
+              <SidebarMenuItem key={index}>
+                <Skeleton className="h-8 w-full" />
+              </SidebarMenuItem>
+            ))}
+          </SidebarMenu>
+        </SidebarGroup>
+      </SidebarContent>
+
+      <SidebarFooter>
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton size="lg" disabled>
+              <Skeleton className="size-12 w-full" />
+            </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarFooter>
