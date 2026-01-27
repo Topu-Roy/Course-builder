@@ -1,4 +1,5 @@
 import type { User } from "better-auth";
+import Link from "next/link";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -22,10 +23,18 @@ export function UserAvatar({ user }: { user: User }) {
       <DropdownMenuContent>
         <DropdownMenuLabel>My Account</DropdownMenuLabel>
         <DropdownMenuSeparator />
+        <DropdownMenuItem asChild>
+          <Link href="/enrolled">My Enrolled Courses</Link>
+        </DropdownMenuItem>
+        <DropdownMenuItem asChild>
+          <Link href="/created">My Created Courses</Link>
+        </DropdownMenuItem>
+        <DropdownMenuSeparator />
         <DropdownMenuItem>Profile</DropdownMenuItem>
         <DropdownMenuItem>Billing</DropdownMenuItem>
         <DropdownMenuItem>Team</DropdownMenuItem>
         <DropdownMenuItem>Subscription</DropdownMenuItem>
+        <DropdownMenuSeparator />
         <SignOutButton />
       </DropdownMenuContent>
     </DropdownMenu>
