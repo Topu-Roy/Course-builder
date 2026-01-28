@@ -23,10 +23,10 @@ export function UserAvatar({ user }: { user: User }) {
       <DropdownMenuContent>
         <DropdownMenuLabel>My Account</DropdownMenuLabel>
         <DropdownMenuSeparator />
-        <DropdownMenuItem asChild>
+        <DropdownMenuItem>
           <Link href="/enrolled">My Enrolled Courses</Link>
         </DropdownMenuItem>
-        <DropdownMenuItem asChild>
+        <DropdownMenuItem>
           <Link href="/created">My Created Courses</Link>
         </DropdownMenuItem>
         <DropdownMenuSeparator />

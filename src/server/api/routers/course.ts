@@ -249,7 +249,19 @@ export const courseRouter = createTRPCRouter({
         createdAt: "desc",
       },
       include: {
-        chapters: true,
+        chapters: {
+          include: {
+            userProgress: {
+              where: {
+                userId: ctx.user.id,
+              },
+              select: {
+                completed: true,
+                progress: true,
+              },
+            },
+          },
+        },
         students: {
           where: {
             id: ctx.user.id,
@@ -261,11 +273,23 @@ export const courseRouter = createTRPCRouter({
       },
     });
 
-    return courses.map((course) => ({
-      ...course,
-      isEnrolled: true,
-      students: undefined,
-    }));
+    return courses.map((course) => {
+      // Calculate overall course progress based on completed chapters
+      const totalChapters = course.chapters.length;
+      const completedChapters = course.chapters.filter(
+        (chapter) => chapter.userProgress[0]?.completed ?? false
+      ).length;
+
+      const progressPercentage = totalChapters > 0 ? Math.round((completedChapters / totalChapters) * 100) : 0;
+
+      return {
+        ...course,
+        isEnrolled: true,
+        progressPercentage,
+        students: undefined,
+        chapters: course.chapters.map(({ userProgress: _userProgress, ...chapter }) => chapter),
+      };
+    });
   }),
 
   get: protectedProcedure.input(getCourseInput).query(async ({ ctx, input }) => {
