@@ -65,7 +65,7 @@ async function Chapter({
 
   return (
     <>
-      <header className="bg-background border-border sticky top-0 flex h-14 shrink-0 items-center justify-between gap-2 border-b pr-4">
+      <header className="bg-background border-border sticky top-0 z-50 flex h-14 shrink-0 items-center justify-between gap-2 border-b pr-4">
         <div className="flex items-center gap-2 px-4">
           <SidebarTrigger className="-ml-1" />
           <Separator orientation="vertical" className="mr-2 h-4" />

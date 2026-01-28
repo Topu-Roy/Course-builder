@@ -6,12 +6,13 @@ import { notFound } from "next/navigation";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Navbar } from "@/components/navbar";
 
 export default async function CoursePage(props: PageProps<"/course/[id]">) {
   return (
     <>
+      <Navbar />
       <Suspense fallback={<CourseSkeleton />}>
         <Course params={props.params} />
       </Suspense>
@@ -29,10 +30,6 @@ async function Course({ params }: { params: Promise<{ id: string }> }) {
 
   return (
     <div className="container mx-auto max-w-4xl px-4 py-10 lg:px-2 2xl:px-0">
-      <div className="mb-4 px-2 md:hidden">
-        <SidebarTrigger />
-      </div>
-      {/* Course Header */}
       <div className="mb-8 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
           <h1 className="mb-4 text-2xl font-bold md:text-4xl">{course.title}</h1>
