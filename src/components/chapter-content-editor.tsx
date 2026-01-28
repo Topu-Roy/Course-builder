@@ -61,7 +61,7 @@ const BlockRenderer = ({
       }`}
     >
       {/* Toolbar */}
-      <div className="bg-background/80 absolute top-2 right-2 z-20 flex items-center gap-1 rounded-md border p-1 shadow-sm backdrop-blur">
+      <div className="absolute top-2 right-2 z-20 flex items-center gap-1 rounded-md border p-1 shadow-sm backdrop-blur">
         <div
           {...dragHandleProps}
           className="hover:bg-muted cursor-grab rounded p-1 active:cursor-grabbing"
@@ -84,14 +84,13 @@ const BlockRenderer = ({
         )}
       </div>
 
-      <div className="mr-8">
-        {/* Block Type Badge */}
-        <div className="mb-2 flex items-center gap-2">
-          <span className="text-muted-foreground bg-muted rounded px-2 py-0.5 font-mono text-xs uppercase select-none">
-            {block.type}
-          </span>
-        </div>
-
+      {/* Block Type Badge */}
+      <div className="flex items-center gap-2">
+        <span className="text-muted-foreground bg-muted rounded px-2 py-0.5 font-mono text-xs uppercase select-none">
+          {block.type}
+        </span>
+      </div>
+      <div className="pt-6">
         {/* Block Content Renderers */}
         {block.type === "heading" && (
           <Input
@@ -292,13 +291,14 @@ export const ChapterContentEditor = ({ chapterId, initialContent, initialTitle }
 
   return (
     <div className="space-y-8">
-      <div className="bg-background/95 sticky top-4 z-10 flex items-center justify-between border-b py-4 backdrop-blur">
+      <div className="bg-background border-border sticky top-0 z-50 flex items-start justify-between border-b py-4">
         <h1 className="text-2xl font-bold">Edit Chapter Content</h1>
-        <div className="flex gap-2">
+        <div className="flex flex-col gap-2">
           <Button disabled={isPending || !isDirty} onClick={onSave} variant={isDirty ? "default" : "secondary"}>
             {isPending ? "Saving..." : isDirty ? "Save Changes" : "Saved"}
             <Save className="ml-2 h-4 w-4" />
           </Button>
+          {isDirty && <span className="text-xs text-yellow-800">You have unsaved changes.</span>}
         </div>
       </div>
 
@@ -313,15 +313,6 @@ export const ChapterContentEditor = ({ chapterId, initialContent, initialTitle }
           />
         </div>
       </div>
-
-      {isDirty && (
-        <div className="sticky top-[80px] z-10 mb-4 flex items-center justify-between rounded border border-yellow-200 bg-yellow-100 p-2 text-sm text-yellow-800">
-          <span>You have unsaved changes.</span>
-          <Button size="sm" onClick={onSave} disabled={isPending}>
-            Save
-          </Button>
-        </div>
-      )}
 
       <DndContext
         sensors={sensors}
@@ -347,7 +338,7 @@ export const ChapterContentEditor = ({ chapterId, initialContent, initialTitle }
       </DndContext>
 
       {/* Add Block Controls */}
-      <div className="bg-background/95 sticky bottom-4 z-10 grid grid-cols-2 gap-2 rounded-lg border p-2 shadow-lg backdrop-blur md:grid-cols-5">
+      <div className="bg-background/95 sticky bottom-4 z-50 grid grid-cols-2 gap-2 rounded-lg border p-2 shadow-lg backdrop-blur md:grid-cols-5">
         <Button variant="outline" onClick={() => addBlock("heading")} className="gap-2">
           <Heading className="h-4 w-4" />
           Heading

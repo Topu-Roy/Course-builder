@@ -6,12 +6,16 @@ import { notFound } from "next/navigation";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ChaptersList } from "@/components/chapters-list";
 import { CourseEditor } from "@/components/course-editor";
+import { Navbar } from "@/components/navbar";
 
 export default async function CourseEditPage({ params }: PageProps<"/course/[id]/edit">) {
   return (
-    <Suspense fallback={<CourseEditSkeleton />}>
-      <CourseEdit params={params} />
-    </Suspense>
+    <>
+      <Navbar />
+      <Suspense fallback={<CourseEditSkeleton />}>
+        <CourseEdit params={params} />
+      </Suspense>
+    </>
   );
 }
 

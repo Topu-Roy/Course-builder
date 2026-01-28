@@ -5,13 +5,17 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ChapterContentEditor } from "@/components/chapter-content-editor";
+import { Navbar } from "@/components/navbar";
 import { type ContentBlock } from "@/lib/types";
 
 export default async function ChapterEditPage({ params }: PageProps<"/course/[id]/chapter/[chapterId]/edit">) {
   return (
-    <Suspense fallback={<ChapterEditSkeleton />}>
-      <ChapterEdit params={params} />
-    </Suspense>
+    <>
+      <Navbar />
+      <Suspense fallback={<ChapterEditSkeleton />}>
+        <ChapterEdit params={params} />
+      </Suspense>
+    </>
   );
 }
 

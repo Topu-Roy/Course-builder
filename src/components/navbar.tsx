@@ -29,7 +29,7 @@ async function AsyncNavbar() {
 
       <div className="ml-auto hidden items-center gap-x-2 md:flex">
         <Link href="/create">
-          <Button variant="ghost" size="sm">
+          <Button variant="outline" size="sm">
             Create Course
           </Button>
         </Link>

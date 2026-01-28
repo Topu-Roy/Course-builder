@@ -43,40 +43,131 @@ export const chapterRouter = createTRPCRouter({
 
     // Update content blocks if provided
     if (content) {
-      // Transaction to handle content replacement
-      await ctx.db.$transaction(async (tx) => {
-        // Delete existing blocks
-        await tx.contentBlock.deleteMany({
-          where: { chapterId },
-        });
-
-        // Create new blocks
-        if (content.length > 0) {
-          await Promise.all(
-            content.map((block, index) => {
-              return tx.contentBlock.create({
-                data: {
-                  id: block.id,
-                  chapterId,
-                  type: block.type,
-                  content: block.content,
-                  order: index,
-                  metadata: block.metadata
-                    ? {
-                        create: {
-                          caption: block.metadata.caption,
-                          language: block.metadata.language,
-                          level: block.metadata.level,
-                          subHeading: block.metadata.subHeading,
-                        },
-                      }
-                    : undefined,
-                },
-              });
-            })
-          );
-        }
+      // Get existing blocks
+      const existingBlocks = await ctx.db.contentBlock.findMany({
+        where: { chapterId },
+        include: { metadata: true },
       });
+
+      const existingIds = new Set(existingBlocks.map((b) => b.id));
+      const newIds = new Set(content.map((b) => b.id));
+
+      // Prepare operations
+      const toDelete = existingBlocks.filter((b) => !newIds.has(b.id));
+      const toCreate = content.filter((b) => !existingIds.has(b.id));
+      const toUpdate = content.filter((b) => existingIds.has(b.id));
+
+      // Execute updates in transaction (increased timeout for larger updates)
+      await ctx.db.$transaction(
+        async (tx) => {
+          // Delete removed blocks
+          if (toDelete.length > 0) {
+            await tx.contentBlock.deleteMany({
+              where: { id: { in: toDelete.map((b) => b.id) } },
+            });
+          }
+
+          // Update existing blocks
+          if (toUpdate.length > 0) {
+            await Promise.all(
+              toUpdate.map((block) => {
+                const index = content.findIndex((b) => b.id === block.id);
+                return tx.contentBlock.update({
+                  where: { id: block.id },
+                  data: {
+                    type: block.type,
+                    content: block.content,
+                    order: index,
+                  },
+                });
+              })
+            );
+
+            // Update or create metadata for existing blocks
+            await Promise.all(
+              toUpdate.map(async (block) => {
+                const existing = existingBlocks.find((b) => b.id === block.id);
+                const hasMetadata =
+                  block.metadata && Object.values(block.metadata).some((val) => val !== null && val !== undefined);
+
+                if (hasMetadata) {
+                  if (existing?.metadata) {
+                    // Update existing metadata
+                    return tx.blockMetadata.update({
+                      where: { contentBlockId: block.id },
+                      data: {
+                        caption: block.metadata!.caption,
+                        language: block.metadata!.language,
+                        level: block.metadata!.level,
+                        subHeading: block.metadata!.subHeading,
+                      },
+                    });
+                  } else {
+                    // Create new metadata
+                    return tx.blockMetadata.create({
+                      data: {
+                        contentBlockId: block.id,
+                        caption: block.metadata!.caption,
+                        language: block.metadata!.language,
+                        level: block.metadata!.level,
+                        subHeading: block.metadata!.subHeading,
+                      },
+                    });
+                  }
+                } else if (existing?.metadata) {
+                  // Delete metadata if it no longer exists
+                  return tx.blockMetadata.delete({
+                    where: { contentBlockId: block.id },
+                  });
+                }
+              })
+            );
+          }
+
+          // Create new blocks
+          if (toCreate.length > 0) {
+            await Promise.all(
+              toCreate.map((block) => {
+                const index = content.findIndex((b) => b.id === block.id);
+                return tx.contentBlock.create({
+                  data: {
+                    id: block.id,
+                    chapterId,
+                    type: block.type,
+                    content: block.content,
+                    order: index,
+                  },
+                });
+              })
+            );
+
+            // Create metadata for new blocks
+            await Promise.all(
+              toCreate
+                .filter(
+                  (block) =>
+                    block.metadata &&
+                    Object.values(block.metadata).some((val) => val !== null && val !== undefined)
+                )
+                .map((block) => {
+                  return tx.blockMetadata.create({
+                    data: {
+                      contentBlockId: block.id,
+                      caption: block.metadata!.caption,
+                      language: block.metadata!.language,
+                      level: block.metadata!.level,
+                      subHeading: block.metadata!.subHeading,
+                    },
+                  });
+                })
+            );
+          }
+        },
+        {
+          maxWait: 15000, // Wait up to 15s to start transaction
+          timeout: 15000, // Allow transaction to run for up to 15s
+        }
+      );
     }
 
     return { success: true };
