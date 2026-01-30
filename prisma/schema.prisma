@@ -24,7 +24,7 @@ enum CourseCategory {
 }
 
 model Course {
-  id          String         @id
+  id          String         @id @default(uuid())
   creatorId   String
   title       String
   description String
@@ -44,7 +44,7 @@ model Course {
 }
 
 model Chapter {
-  id           String         @id
+  id           String         @id @default(uuid())
   title        String
   order        Int
   courseId     String
@@ -60,7 +60,7 @@ model Chapter {
 }
 
 model ContentBlock {
-  id        String         @id
+  id        String         @id @default(uuid())
   chapterId String
   type      String
   content   String
@@ -76,7 +76,7 @@ model ContentBlock {
 }
 
 model BlockMetadata {
-  id             String  @id
+  id             String  @id @default(uuid())
   contentBlockId String  @unique
   caption        String?
   language       String?
@@ -90,7 +90,7 @@ model BlockMetadata {
 }
 
 model UserProgress {
-  id        String   @id
+  id        String   @id @default(uuid())
   userId    String
   chapterId String
   progress  Int      @default(0)
@@ -107,7 +107,7 @@ model UserProgress {
 }
 
 model User {
-  id              String         @id
+  id              String         @id @default(uuid())
   name            String
   email           String
   emailVerified   Boolean        @default(false)
@@ -129,7 +129,7 @@ model User {
 }
 
 model Session {
-  id             String   @id
+  id             String   @id @default(uuid())
   expiresAt      DateTime
   token          String
   createdAt      DateTime @default(now())
@@ -146,7 +146,7 @@ model Session {
 }
 
 model Account {
-  id                    String    @id
+  id                    String    @id @default(uuid())
   accountId             String
   providerId            String
   userId                String
@@ -166,7 +166,7 @@ model Account {
 }
 
 model Verification {
-  id         String   @id
+  id         String   @id @default(uuid())
   identifier String
   value      String
   expiresAt  DateTime

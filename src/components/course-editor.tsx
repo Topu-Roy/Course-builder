@@ -18,12 +18,16 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { CourseBanner } from "./course-banner";
+import { CourseThumbnail } from "./course-thumbnail";
 
 interface CourseEditorProps {
   course: {
     id: string;
     title: string;
     description: string;
+    bannerUrl?: string | null;
+    imageUrl?: string | null;
   };
 }
 
@@ -111,19 +115,26 @@ export const CourseEditor = ({ course }: CourseEditorProps) => {
         </div>
       </div>
 
-      <div className="bg-card text-card-foreground grid gap-4 rounded-lg border p-4 shadow-sm">
-        <div className="grid gap-2">
-          <Label htmlFor="title">Course Title</Label>
-          <Input id="title" value={title} onChange={(e) => setTitle(e.target.value)} disabled={isPending} />
+      <CourseBanner courseId={course.id} bannerUrl={course.bannerUrl} isCreator={true} />
+
+      <div className="flex flex-col gap-6 md:flex-row md:items-start">
+        <div className="flex justify-center md:block">
+          <CourseThumbnail courseId={course.id} imageUrl={course.imageUrl} isCreator={true} />
         </div>
-        <div className="grid gap-2">
-          <Label htmlFor="description">Description</Label>
-          <Textarea
-            id="description"
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            disabled={isPending}
-          />
+        <div className="bg-card text-card-foreground grid flex-1 gap-4 rounded-lg border p-4 shadow-sm">
+          <div className="grid gap-2">
+            <Label htmlFor="title">Course Title</Label>
+            <Input id="title" value={title} onChange={(e) => setTitle(e.target.value)} disabled={isPending} />
+          </div>
+          <div className="grid gap-2">
+            <Label htmlFor="description">Description</Label>
+            <Textarea
+              id="description"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              disabled={isPending}
+            />
+          </div>
         </div>
       </div>
 

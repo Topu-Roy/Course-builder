@@ -304,6 +304,8 @@ export const courseRouter = createTRPCRouter({
         title: true,
         description: true,
         creatorId: true,
+        bannerUrl: true,
+        imageUrl: true,
         chapters: {
           orderBy: { order: "asc" },
           select: {

@@ -56,9 +56,28 @@ function CourseEditSkeleton() {
       <div className="mb-6">
         <Skeleton className="h-4 w-48" />
       </div>
-      <Skeleton className="h-10 w-full" />
-      <Skeleton className="h-10 w-full" />
-      <Skeleton className="h-10 w-full" />
+
+      <div className="space-y-8">
+        <div className="flex items-center justify-between">
+          <Skeleton className="h-10 w-48" />
+          <div className="flex gap-2">
+            <Skeleton className="h-10 w-32" />
+            <Skeleton className="h-10 w-32" />
+          </div>
+        </div>
+
+        <Skeleton className="aspect-[2.5/1] w-full rounded-xl md:aspect-4/1" />
+
+        <div className="flex flex-col gap-6 md:flex-row md:items-start">
+          <div className="flex justify-center md:block">
+            <Skeleton className="aspect-square w-28 rounded-xl md:w-40" />
+          </div>
+          <div className="flex-1 space-y-4">
+            <Skeleton className="h-20 w-full rounded-lg" />
+            <Skeleton className="h-32 w-full rounded-lg" />
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
