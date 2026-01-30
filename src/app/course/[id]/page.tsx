@@ -4,10 +4,12 @@ import { CheckCircle, Circle } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { CourseBanner } from "@/components/course-banner";
+import { CourseThumbnail } from "@/components/course-thumbnail";
 import { Navbar } from "@/components/navbar";
 
 export default async function CoursePage(props: PageProps<"/course/[id]">) {
@@ -32,18 +34,39 @@ async function Course({ params }: { params: Promise<{ id: string }> }) {
   return (
     <div className="container mx-auto max-w-4xl px-4 py-10 lg:px-2 2xl:px-0">
       <CourseBanner courseId={course.id} bannerUrl={course.bannerUrl} isCreator={isCreator} />
-      <div className="mb-8 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-        <div>
-          <h1 className="mb-4 text-2xl font-bold md:text-4xl">{course.title}</h1>
-          <p className="text-muted-foreground line-clamp-3 text-lg">{course.description}</p>
+
+      <div className="mb-8 flex flex-col gap-6 md:flex-row">
+        <CourseThumbnail courseId={course.id} imageUrl={course.imageUrl} isCreator={isCreator} />
+
+        <div className="flex flex-1 flex-col justify-between">
+          <div>
+            <div className="flex items-start justify-between gap-4">
+              <h1 className="mb-2 text-2xl font-bold md:text-4xl">{course.title}</h1>
+              {isCreator ? (
+                <Link href={`/course/${course.id}/edit`} className="shrink-0">
+                  <Button variant="outline" size="sm">
+                    Edit Course
+                  </Button>
+                </Link>
+              ) : null}
+            </div>
+            <p className="text-muted-foreground line-clamp-2 text-lg">{course.description}</p>
+          </div>
+
+          <div className="mt-4 flex items-center gap-3">
+            <Avatar className="h-10 w-10 border">
+              <AvatarImage src={course.creator.image ?? ""} alt={course.creator.name} />
+              <AvatarFallback>{course.creator.name.charAt(0)}</AvatarFallback>
+            </Avatar>
+            <div className="flex flex-col">
+              <p className="text-sm font-medium">{course.creator.name}</p>
+              <p className="text-muted-foreground text-xs">
+                Created: {new Date(course.createdAt).toLocaleDateString()} • Updated:{" "}
+                {new Date(course.updatedAt).toLocaleDateString()}
+              </p>
+            </div>
+          </div>
         </div>
-        {isCreator ? (
-          <Link href={`/course/${course.id}/edit`} className="w-full md:w-auto">
-            <Button variant="outline" className="w-full md:w-auto">
-              Edit Course
-            </Button>
-          </Link>
-        ) : null}
       </div>
 
       {/* Chapter List */}
@@ -84,15 +107,28 @@ async function Course({ params }: { params: Promise<{ id: string }> }) {
 function CourseSkeleton() {
   return (
     <div className="container mx-auto max-w-4xl px-4 py-10 lg:px-2 2xl:px-0">
+      {/* Course Banner Skeleton */}
+      <Skeleton className="mb-8 aspect-4/1 w-full rounded-xl" />
+
       {/* Course Header Skeleton */}
-      <div className="mb-8 flex items-center justify-between">
-        <div className="space-y-4">
-          <Skeleton className="h-10 w-[400px]" />
-          <Skeleton className="h-6 w-[600px]" />
+      <div className="mb-8 flex flex-col gap-6 md:flex-row">
+        <Skeleton className="aspect-square w-32 rounded-xl md:w-40" />
+        <div className="flex flex-1 flex-col justify-between py-2">
+          <div>
+            <div className="flex items-start justify-between">
+              <Skeleton className="mb-4 h-10 w-[300px]" />
+              <Skeleton className="h-8 w-[100px]" />
+            </div>
+            <Skeleton className="h-6 w-full max-w-[500px]" />
+          </div>
+          <div className="mt-4 flex items-center gap-3">
+            <Skeleton className="h-10 w-10 rounded-full" />
+            <div className="space-y-2">
+              <Skeleton className="h-4 w-[100px]" />
+              <Skeleton className="h-3 w-[200px]" />
+            </div>
+          </div>
         </div>
-        <Button variant="outline" disabled>
-          <Skeleton className="h-4 w-[80px]" />
-        </Button>
       </div>
 
       {/* Chapter List Skeleton */}

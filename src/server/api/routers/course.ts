@@ -110,7 +110,7 @@ export const courseRouter = createTRPCRouter({
   }),
 
   update: protectedProcedure.input(updateCourseInput).mutation(async ({ ctx, input }) => {
-    const { courseId, title, description, bannerUrl } = input;
+    const { courseId, title, description, bannerUrl, imageUrl } = input;
 
     // Verify ownership
     const course = await ctx.db.course.findUnique({
@@ -132,6 +132,7 @@ export const courseRouter = createTRPCRouter({
         title,
         description,
         bannerUrl,
+        imageUrl,
       },
     });
 
@@ -377,6 +378,16 @@ export const courseRouter = createTRPCRouter({
         creatorId: true,
         description: true,
         bannerUrl: true,
+        imageUrl: true,
+        createdAt: true,
+        updatedAt: true,
+        creator: {
+          select: {
+            id: true,
+            name: true,
+            image: true,
+          },
+        },
         chapters: {
           orderBy: { order: "asc" },
           select: {

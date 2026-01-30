@@ -51,6 +51,7 @@ export const updateCourseInput = object({
   title: string().optional(),
   description: string().optional(),
   bannerUrl: string().optional(),
+  imageUrl: string().optional(),
 });
 
 export const getCourseInput = object({
