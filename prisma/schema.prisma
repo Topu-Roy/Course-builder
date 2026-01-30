@@ -7,23 +7,6 @@ datasource db {
   provider = "postgresql"
 }
 
-model Course {
-  id          String         @id @default(cuid())
-  creatorId   String
-  title       String
-  description String
-  topic       String         @default("")
-  category    CourseCategory
-  imageUrl    String?
-  bannerUrl   String?
-  createdAt   DateTime       @default(now())
-  updatedAt   DateTime       @updatedAt
-  chapters    Chapter[]
-
-  creator  User   @relation("CreatedCourses", fields: [creatorId], references: [id])
-  students User[] @relation("EnrolledCourses")
-}
-
 enum CourseCategory {
   TECHNOLOGY
   BUSINESS
@@ -40,44 +23,74 @@ enum CourseCategory {
   OTHER
 }
 
+model Course {
+  id          String         @id
+  creatorId   String
+  title       String
+  description String
+  topic       String         @default("")
+  category    CourseCategory
+  imageUrl    String?
+  bannerUrl   String?
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+  chapters    Chapter[]
+
+  creator  User   @relation("CreatedCourses", fields: [creatorId], references: [id])
+  students User[] @relation("EnrolledCourses")
+
+  @@index([creatorId])
+  @@map("course")
+}
+
 model Chapter {
-  id           String         @id @default(cuid())
+  id           String         @id
   title        String
-  blocks       ContentBlock[]
   order        Int
   courseId     String
   createdAt    DateTime       @default(now())
   updatedAt    DateTime       @updatedAt
+  blocks       ContentBlock[]
   userProgress UserProgress[]
 
   course Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  @@index([courseId])
+  @@map("chapter")
 }
 
 model ContentBlock {
-  id        String         @id @default(cuid())
+  id        String         @id
   chapterId String
-  chapter   Chapter        @relation(fields: [chapterId], references: [id], onDelete: Cascade)
   type      String
   content   String
-  metadata  BlockMetadata?
   order     Int
+  metadata  BlockMetadata?
   createdAt DateTime       @default(now())
   updatedAt DateTime       @updatedAt
+
+  chapter Chapter @relation(fields: [chapterId], references: [id], onDelete: Cascade)
+
+  @@index([chapterId])
+  @@map("content_block")
 }
 
 model BlockMetadata {
-  id             String       @id @default(cuid())
-  contentBlockId String       @unique
-  block          ContentBlock @relation(fields: [contentBlockId], references: [id], onDelete: Cascade)
+  id             String  @id
+  contentBlockId String  @unique
+  caption        String?
+  language       String?
+  level          Int?
+  subHeading     String?
 
-  caption    String?
-  language   String?
-  level      Int?
-  subHeading String?
+  block ContentBlock @relation(fields: [contentBlockId], references: [id], onDelete: Cascade)
+
+  @@index([contentBlockId])
+  @@map("block_metadata")
 }
 
 model UserProgress {
-  id        String   @id @default(cuid())
+  id        String   @id
   userId    String
   chapterId String
   progress  Int      @default(0)
@@ -89,6 +102,8 @@ model UserProgress {
   chapter Chapter @relation(fields: [chapterId], references: [id], onDelete: Cascade)
 
   @@unique([userId, chapterId])
+  @@index([userId, chapterId])
+  @@map("user_progress")
 }
 
 model User {
