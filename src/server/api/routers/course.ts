@@ -1,3 +1,4 @@
+import { type Prisma } from "@/generated/prisma/client";
 import { generateCourseOutline } from "@/server/actions/ai";
 import {
   courseCreationServerInput,
@@ -20,15 +21,9 @@ import { getCachedChapter } from "./query/getChapter";
 export const courseRouter = createTRPCRouter({
   createCourse: protectedProcedure.input(courseCreationServerInput).mutation(async ({ ctx, input }) => {
     const { topic, description, category, imageUrl } = input;
-    const startOverall = Date.now();
-
-    console.clear();
 
     // 1. Generate the course outline using AI
-    console.log("--- Course Creation: AI Generation Started ---");
-    const startAI = Date.now();
     const courseOutline = await generateCourseOutline(topic, description);
-    console.log(`AI Generation Finished in ${Date.now() - startAI}ms`);
 
     // 2. Identify all search tasks across all chapters
     const searchTasks = courseOutline.chapters.flatMap((chapter, chapterIndex) =>
@@ -43,15 +38,12 @@ export const courseRouter = createTRPCRouter({
 
     // 3. Search EVERYTHING in parallel
     // This fires all YouTube requests at once
-    console.log(`--- Course Creation: YouTube Search Started (${searchTasks.length} tasks) ---`);
-    const startYouTube = Date.now();
     const searchResults = await Promise.all(
       searchTasks.map(async (task) => ({
         ...task,
         videoUrl: await searchYouTubeVideo(task.searchQuery),
       }))
     );
-    console.log(`YouTube Search Finished in ${Date.now() - startYouTube}ms`);
 
     // 4. Reconstruct the enriched chapters
     const enrichedChapters = courseOutline.chapters.map((chapter, chapterIndex) => {
@@ -78,50 +70,82 @@ export const courseRouter = createTRPCRouter({
     });
 
     // 5. Save the course to the database
-    console.log("--- Course Creation: Database Save Started ---");
-    const startDB = Date.now();
-    const course = await ctx.db.course.create({
-      data: {
-        creatorId: ctx.user.id,
-        title: courseOutline.courseTitle,
-        description: courseOutline.courseDescription,
-        topic: topic,
-        category: category,
-        imageUrl: imageUrl,
-        chapters: {
-          create: enrichedChapters.map((chapter, index) => ({
-            title: chapter.title,
-            order: index,
-            blocks: {
-              create: chapter.content.map((block, blockIndex) => ({
-                id: block.id,
-                type: block.type,
-                content: block.content,
-                metadata: block.metadata
-                  ? {
-                      create: {
-                        caption: block.metadata.caption,
-                        language: block.metadata.language,
-                        level: block.metadata.level,
-                        subHeading: block.metadata.subHeading,
-                      },
-                    }
-                  : undefined,
-                order: blockIndex,
-              })),
-            },
-          })),
-        },
-      },
-      select: {
-        id: true,
-      },
-    });
 
-    console.log(`Database Save Finished in ${Date.now() - startDB}ms`);
+    const course = await ctx.db.$transaction(
+      async (tx) => {
+        // 5a. Create the course first
+        const newCourse = await tx.course.create({
+          data: {
+            creatorId: ctx.user.id,
+            title: courseOutline.courseTitle,
+            description: courseOutline.courseDescription,
+            topic: topic,
+            category: category,
+            imageUrl: imageUrl,
+          },
+          select: { id: true },
+        });
 
-    const totalTime = Date.now() - startOverall;
-    console.log(`--- Course Creation: OVERALL SUCCESS in ${totalTime}ms ---`);
+        // 5b. Prepare and batch insert Chapters
+        const chapterData = enrichedChapters.map((chapter, index) => ({
+          id: crypto.randomUUID(),
+          title: chapter.title,
+          order: index,
+          courseId: newCourse.id,
+        }));
+
+        await tx.chapter.createMany({
+          data: chapterData,
+        });
+
+        // 5c. Prepare and batch insert ContentBlocks and Metadata
+        const blockData: Prisma.ContentBlockCreateManyInput[] = [];
+        const metadataData: Prisma.BlockMetadataCreateManyInput[] = [];
+
+        enrichedChapters.forEach((chapter, chapterIndex) => {
+          const chapterId = chapterData[chapterIndex].id;
+          chapter.content.forEach((block, blockIndex) => {
+            const blockId = block.id; // Already a UUID from step 4
+            blockData.push({
+              id: blockId,
+              chapterId: chapterId,
+              type: block.type,
+              content: block.content,
+              order: blockIndex,
+            });
+
+            if (block.metadata) {
+              metadataData.push({
+                id: crypto.randomUUID(),
+                contentBlockId: blockId,
+                caption: block.metadata.caption,
+                language: block.metadata.language,
+                level: block.metadata.level,
+                subHeading: block.metadata.subHeading,
+              });
+            }
+          });
+        });
+
+        if (blockData.length > 0) {
+          await tx.contentBlock.createMany({
+            data: blockData,
+          });
+        }
+
+        if (metadataData.length > 0) {
+          await tx.blockMetadata.createMany({
+            data: metadataData,
+          });
+        }
+
+        return newCourse;
+      },
+      {
+        maxWait: 10000, // 10s wait for connection
+        timeout: 30000, // 30s for the transaction to complete
+      }
+    );
 
     return course;
   }),

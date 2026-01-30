@@ -17,7 +17,8 @@ export async function searchYouTubeVideo(query: string): Promise<string | null> 
     const response = await fetch(url);
 
     if (!response.ok) {
-      console.error(`YouTube API error: ${response.status}`);
+      const errorBody = await response.json();
+      console.error(`YouTube API error: ${response.status}`, JSON.stringify(errorBody, null, 2));
       return null;
     }
 
