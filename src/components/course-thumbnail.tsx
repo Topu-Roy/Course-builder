@@ -30,7 +30,7 @@ export const CourseThumbnail = ({ courseId, imageUrl, isCreator }: CourseThumbna
   });
 
   return (
-    <div className="group border-primary bg-foreground/90 relative aspect-square w-32 overflow-hidden rounded-xl border md:w-40">
+    <div className="group border-primary bg-foreground/90 relative aspect-square w-28 overflow-hidden rounded-xl border md:w-40">
       {imageUrl ? (
         <>
           <Image src={imageUrl} alt="Course Thumbnail" fill className="object-cover" />

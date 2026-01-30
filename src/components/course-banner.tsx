@@ -34,7 +34,7 @@ export const CourseBanner = ({ courseId, bannerUrl, isCreator }: CourseBannerPro
   }
 
   return (
-    <div className="group bg-foreground/90 border-primary relative mb-8 aspect-4/1 w-full overflow-hidden rounded-xl border">
+    <div className="group border-primary bg-foreground/90 relative mb-8 aspect-[2.5/1] w-full overflow-hidden rounded-xl border md:aspect-4/1">
       {bannerUrl ? (
         <>
           <Image src={bannerUrl} alt="Course Banner" fill className="object-cover" />

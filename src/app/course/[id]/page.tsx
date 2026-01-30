@@ -35,34 +35,41 @@ async function Course({ params }: { params: Promise<{ id: string }> }) {
     <div className="container mx-auto max-w-4xl px-4 py-10 lg:px-2 2xl:px-0">
       <CourseBanner courseId={course.id} bannerUrl={course.bannerUrl} isCreator={isCreator} />
 
-      <div className="mb-8 flex flex-col gap-6 md:flex-row">
-        <CourseThumbnail courseId={course.id} imageUrl={course.imageUrl} isCreator={isCreator} />
+      <div className="mb-8 flex flex-col gap-6 md:flex-row md:items-start">
+        <div className="flex justify-center md:block">
+          <CourseThumbnail courseId={course.id} imageUrl={course.imageUrl} isCreator={isCreator} />
+        </div>
 
-        <div className="flex flex-1 flex-col justify-between">
-          <div>
-            <div className="flex items-start justify-between gap-4">
-              <h1 className="mb-2 text-2xl font-bold md:text-3xl">{course.title}</h1>
-              {isCreator ? (
-                <Link href={`/course/${course.id}/edit`} className="shrink-0">
-                  <Button variant="outline" size="sm">
-                    Edit Course
-                  </Button>
-                </Link>
-              ) : null}
+        <div className="flex flex-1 flex-col">
+          <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+            <div className="flex-1 text-center md:text-left">
+              <h1 className="mb-2 text-2xl font-bold md:text-3xl lg:text-4xl">{course.title}</h1>
+              <p className="text-muted-foreground line-clamp-2 text-sm md:text-base">{course.description}</p>
             </div>
-            <p className="text-muted-foreground line-clamp-2">{course.description}</p>
+            {isCreator && (
+              <Link href={`/course/${course.id}/edit`} className="mx-auto shrink-0 md:mx-0">
+                <Button variant="outline" size="sm" className="w-full md:w-auto">
+                  Edit Course
+                </Button>
+              </Link>
+            )}
           </div>
 
-          <div className="mt-4 flex items-center gap-3">
-            <Avatar className="h-10 w-10 border">
-              <AvatarImage src={course.creator.image ?? ""} alt={course.creator.name} />
-              <AvatarFallback>{course.creator.name.charAt(0)}</AvatarFallback>
-            </Avatar>
-            <div className="flex flex-col">
+          <div className="mt-6 flex flex-wrap items-center justify-center gap-4 border-t pt-4 md:justify-start">
+            <div className="flex items-center gap-2">
+              <Avatar className="size-8 border">
+                <AvatarImage src={course.creator.image ?? ""} alt={course.creator.name} />
+                <AvatarFallback>{course.creator.name.charAt(0)}</AvatarFallback>
+              </Avatar>
               <p className="text-sm font-medium">{course.creator.name}</p>
-              <p className="text-muted-foreground text-xs">
-                Created: {new Date(course.createdAt).toLocaleDateString()} • Updated:{" "}
-                {new Date(course.updatedAt).toLocaleDateString()}
+            </div>
+            <div className="text-muted-foreground hidden h-4 border-r md:block" />
+            <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1 md:justify-start">
+              <p className="text-xs whitespace-nowrap">
+                <span className="font-semibold">Created:</span> {new Date(course.createdAt).toLocaleDateString()}
+              </p>
+              <p className="text-xs whitespace-nowrap">
+                <span className="font-semibold">Updated:</span> {new Date(course.updatedAt).toLocaleDateString()}
               </p>
             </div>
           </div>
@@ -108,24 +115,32 @@ function CourseSkeleton() {
   return (
     <div className="container mx-auto max-w-4xl px-4 py-10 lg:px-2 2xl:px-0">
       {/* Course Banner Skeleton */}
-      <Skeleton className="mb-8 aspect-4/1 w-full rounded-xl" />
+      <Skeleton className="mb-8 aspect-[2.5/1] w-full rounded-xl md:aspect-4/1" />
 
       {/* Course Header Skeleton */}
-      <div className="mb-8 flex flex-col gap-6 md:flex-row">
-        <Skeleton className="aspect-square w-32 rounded-xl md:w-40" />
-        <div className="flex flex-1 flex-col justify-between py-2">
-          <div>
-            <div className="flex items-start justify-between">
-              <Skeleton className="mb-4 h-10 w-[300px]" />
-              <Skeleton className="h-8 w-[100px]" />
+      <div className="mb-8 flex flex-col gap-6 md:flex-row md:items-start">
+        <div className="flex justify-center md:block">
+          <Skeleton className="aspect-square w-28 rounded-xl md:w-40" />
+        </div>
+
+        <div className="flex flex-1 flex-col">
+          <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+            <div className="flex-1 space-y-2 text-center md:text-left">
+              <Skeleton className="mx-auto h-10 w-[250px] md:mx-0 md:w-[300px]" />
+              <Skeleton className="mx-auto h-6 w-full max-w-[500px] md:mx-0" />
             </div>
-            <Skeleton className="h-6 w-full max-w-[500px]" />
+            <Skeleton className="mx-auto h-8 w-[100px] md:mx-0" />
           </div>
-          <div className="mt-4 flex items-center gap-3">
-            <Skeleton className="h-10 w-10 rounded-full" />
-            <div className="space-y-2">
+
+          <div className="mt-6 flex items-center justify-center gap-4 border-t pt-4 md:justify-start">
+            <div className="flex items-center gap-2">
+              <Skeleton className="size-8 rounded-full" />
               <Skeleton className="h-4 w-[100px]" />
-              <Skeleton className="h-3 w-[200px]" />
+            </div>
+            <div className="hidden h-4 border-r md:block" />
+            <div className="flex gap-4">
+              <Skeleton className="h-3 w-[80px]" />
+              <Skeleton className="h-3 w-[80px]" />
             </div>
           </div>
         </div>
