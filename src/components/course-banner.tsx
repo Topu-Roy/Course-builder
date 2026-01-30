@@ -6,12 +6,13 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { UploadButton } from "@/lib/uploadthing";
+import { Spinner } from "./ui/spinner";
 
-interface CourseBannerProps {
+type CourseBannerProps = {
   courseId: string;
   bannerUrl?: string | null;
   isCreator: boolean;
-}
+};
 
 export const CourseBanner = ({ courseId, bannerUrl, isCreator }: CourseBannerProps) => {
   const router = useRouter();
@@ -21,10 +22,10 @@ export const CourseBanner = ({ courseId, bannerUrl, isCreator }: CourseBannerPro
     onSuccess: () => {
       toast.success("Banner updated");
       router.refresh();
-      utils.course.getCourseChapters.invalidate({ courseId });
+      void utils.course.getCourseChapters.invalidate({ courseId });
     },
     onError: (error) => {
-      toast.error(error.message || "Failed to update banner");
+      toast.error(error.message ?? "Failed to update banner");
     },
   });
 
@@ -51,10 +52,10 @@ export const CourseBanner = ({ courseId, bannerUrl, isCreator }: CourseBannerPro
                   toast.error(`ERROR! ${error.message}`);
                 }}
                 content={{
-                  button: ({ ready }) => (
+                  button: () => (
                     <div className="flex items-center gap-2 font-medium text-white">
                       <Plus className="h-4 w-4" />
-                      <span>Change Banner</span>
+                      {isPending ? <Spinner /> : "Change Banner"}
                     </div>
                   ),
                 }}

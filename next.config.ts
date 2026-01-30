@@ -5,6 +5,14 @@ const nextConfig: NextConfig = {
   reactCompiler: true,
   typedRoutes: true,
   cacheComponents: true,
+  images: {
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "zw8hl9dg50.ufs.sh",
+      },
+    ],
+  },
 };
 
 export default nextConfig;
