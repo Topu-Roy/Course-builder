@@ -51,13 +51,13 @@ export function MobileNav({ user }: MobileNavProps) {
             </Link>
             {user && (
               <>
-                <Link href={"/created" as any}>
+                <Link href={"/created"}>
                   <Button variant="ghost" className="w-full justify-start text-base">
                     <BookOpen className="mr-3 h-5 w-5" />
                     Created Courses
                   </Button>
                 </Link>
-                <Link href={"/enrolled" as any}>
+                <Link href={"/enrolled"}>
                   <Button variant="ghost" className="w-full justify-start text-base">
                     <GraduationCap className="mr-3 h-5 w-5" />
                     Enrolled Courses

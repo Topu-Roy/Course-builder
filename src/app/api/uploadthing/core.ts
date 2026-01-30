@@ -11,9 +11,10 @@ export const uploadthingRouter = {
       maxFileCount: 1,
     },
   })
-    .middleware(async ({ req }) => {
+    .middleware(async () => {
       const session = await getServerSession();
 
+      // eslint-disable-next-line @typescript-eslint/only-throw-error
       if (!session) throw new UploadThingError("Unauthorized");
 
       return { userId: session.user.id };
