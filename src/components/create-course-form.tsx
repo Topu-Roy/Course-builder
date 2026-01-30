@@ -1,20 +1,17 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { useForm } from "@tanstack/react-form";
 import type { CourseCategory } from "@/generated/prisma/enums";
-import { type generateCourseOutlineSchema } from "@/server/actions/schema";
 import { api } from "@/trpc/react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { enum as enum_, object, string, type z } from "zod/v4";
+import { enum as enum_, object, string } from "zod/v4";
 import { Button } from "@/components/ui/button";
 import { Field, FieldError, FieldGroup, FieldLabel, FieldSet } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { COURSE_CATEGORIES } from "@/lib/constants";
-import type { ContentBlock } from "@/lib/types";
 
 export const formSchema = object({
   topic: string().nonempty({
@@ -28,40 +25,16 @@ export const formSchema = object({
 
 export function CreateCourseForm() {
   const router = useRouter();
-  const [category, setCategory] = useState<CourseCategory>("OTHER");
-  const [outline, setOutline] = useState<z.infer<typeof generateCourseOutlineSchema> | null>(null);
-  const {
-    mutate: searchRelatedVideos,
-    data: searchResults,
-    isPending: isSearching,
-  } = api.createCourse.searchRelatedVideos.useMutation();
 
-  useEffect(() => {
-    if (!outline) return;
-
-    const searchTasks = outline.chapters.flatMap((chapter, chapterIndex) =>
-      chapter.content
-        .filter((block) => block.type === "heading")
-        .map((block) => ({
-          chapterIndex,
-          content: block.content,
-          searchQuery: `${chapter.title} ${block.content}`,
-        }))
-    );
-
-    if (searchTasks.length > 0) {
-      searchRelatedVideos(searchTasks);
-    }
-  }, [outline, searchRelatedVideos]);
-  const { mutate: generateCourseOutline, isPending } = api.createCourse.generateCourseOutline.useMutation();
-  const { mutate: createCourse } = api.createCourse.createCourse.useMutation();
-
-  useEffect(() => {
-    if (isSearching) {
-      console.log(isSearching);
-      console.log("Searching for videos...");
-    }
-  }, [isSearching]);
+  const { mutate: createCourse, isPending } = api.course.createCourse.useMutation({
+    onSuccess: (data) => {
+      toast.success("Successfully created course!");
+      void router.push(`/course/${data.id}/edit`);
+    },
+    onError: () => {
+      toast.error("Something went wrong. Please try again.");
+    },
+  });
 
   const form = useForm({
     defaultValues: {
@@ -74,70 +47,13 @@ export function CreateCourseForm() {
       onChange: formSchema,
     },
     onSubmit: ({ value }) => {
-      setCategory(value.category);
-      generateCourseOutline(
-        {
-          topic: value.topic,
-          description: value.description,
-        },
-        {
-          onSuccess(data) {
-            toast.success("Successfully generated course outline!");
-            setOutline(data);
-          },
-          onError() {
-            toast.error("Something went wrong. Please try again.");
-          },
-        }
-      );
+      createCourse({
+        topic: value.topic,
+        description: value.description,
+        category: value.category,
+      });
     },
   });
-
-  useEffect(() => {
-    if (!outline || !searchResults) return;
-
-    // 4. Reconstruct the enriched chapters
-    const enrichedChapters = outline.chapters.map((chapter, chapterIndex) => {
-      const newContent: ContentBlock[] = [];
-
-      chapter.content.forEach((block) => {
-        newContent.push({ ...block, id: crypto.randomUUID() });
-
-        // If this block was searched, find its result and inject the video
-        if (block.type === "heading") {
-          const result = searchResults.find((r) => r.chapterIndex === chapterIndex && r.content === block.content);
-          if (result?.videoUrl) {
-            newContent.push({
-              id: crypto.randomUUID(),
-              type: "video",
-              content: result.videoUrl,
-              metadata: { caption: `Video: ${block.content}` },
-            });
-          }
-        }
-      });
-
-      return { ...chapter, content: newContent };
-    });
-
-    createCourse(
-      {
-        topic: outline.courseTitle,
-        description: outline.courseDescription,
-        chapters: enrichedChapters,
-        category: category,
-      },
-      {
-        onSuccess(data) {
-          toast.success("Successfully created course!");
-          void router.push(`/course/${data.id}/edit`);
-        },
-        onError() {
-          toast.error("Something went wrong. Please try again.");
-        },
-      }
-    );
-  }, [category, createCourse, outline, router, searchResults]);
 
   return (
     <form

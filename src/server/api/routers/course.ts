@@ -1,6 +1,6 @@
 import { generateCourseOutline } from "@/server/actions/ai";
 import {
-  createCourseInput,
+  courseCreationServerInput,
   deleteCourseInput,
   enrollCourseInput,
   getChapterInput,
@@ -18,10 +18,17 @@ import { type ContentBlock } from "@/lib/types";
 import { getCachedChapter } from "./query/getChapter";
 
 export const courseRouter = createTRPCRouter({
-  createCourse: protectedProcedure.input(createCourseInput).mutation(async ({ ctx, input }) => {
+  createCourse: protectedProcedure.input(courseCreationServerInput).mutation(async ({ ctx, input }) => {
     const { topic, description, category, imageUrl } = input;
+    const startOverall = Date.now();
+
+    console.clear();
+
     // 1. Generate the course outline using AI
+    console.log("--- Course Creation: AI Generation Started ---");
+    const startAI = Date.now();
     const courseOutline = await generateCourseOutline(topic, description);
+    console.log(`AI Generation Finished in ${Date.now() - startAI}ms`);
 
     // 2. Identify all search tasks across all chapters
     const searchTasks = courseOutline.chapters.flatMap((chapter, chapterIndex) =>
@@ -36,12 +43,15 @@ export const courseRouter = createTRPCRouter({
 
     // 3. Search EVERYTHING in parallel
     // This fires all YouTube requests at once
+    console.log(`--- Course Creation: YouTube Search Started (${searchTasks.length} tasks) ---`);
+    const startYouTube = Date.now();
     const searchResults = await Promise.all(
       searchTasks.map(async (task) => ({
         ...task,
         videoUrl: await searchYouTubeVideo(task.searchQuery),
       }))
     );
+    console.log(`YouTube Search Finished in ${Date.now() - startYouTube}ms`);
 
     // 4. Reconstruct the enriched chapters
     const enrichedChapters = courseOutline.chapters.map((chapter, chapterIndex) => {
@@ -68,6 +78,8 @@ export const courseRouter = createTRPCRouter({
     });
 
     // 5. Save the course to the database
+    console.log("--- Course Creation: Database Save Started ---");
+    const startDB = Date.now();
     const course = await ctx.db.course.create({
       data: {
         creatorId: ctx.user.id,
@@ -105,6 +117,11 @@ export const courseRouter = createTRPCRouter({
         id: true,
       },
     });
+
+    console.log(`Database Save Finished in ${Date.now() - startDB}ms`);
+
+    const totalTime = Date.now() - startOverall;
+    console.log(`--- Course Creation: OVERALL SUCCESS in ${totalTime}ms ---`);
 
     return course;
   }),
