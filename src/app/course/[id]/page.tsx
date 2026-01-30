@@ -41,7 +41,7 @@ async function Course({ params }: { params: Promise<{ id: string }> }) {
         <div className="flex flex-1 flex-col justify-between">
           <div>
             <div className="flex items-start justify-between gap-4">
-              <h1 className="mb-2 text-2xl font-bold md:text-4xl">{course.title}</h1>
+              <h1 className="mb-2 text-2xl font-bold md:text-3xl">{course.title}</h1>
               {isCreator ? (
                 <Link href={`/course/${course.id}/edit`} className="shrink-0">
                   <Button variant="outline" size="sm">
@@ -50,7 +50,7 @@ async function Course({ params }: { params: Promise<{ id: string }> }) {
                 </Link>
               ) : null}
             </div>
-            <p className="text-muted-foreground line-clamp-2 text-lg">{course.description}</p>
+            <p className="text-muted-foreground line-clamp-2">{course.description}</p>
           </div>
 
           <div className="mt-4 flex items-center gap-3">
@@ -75,10 +75,10 @@ async function Course({ params }: { params: Promise<{ id: string }> }) {
           const isCompleted = chapter.userProgress.some((p) => p.completed && p.chapter.id === chapter.id);
 
           return (
-            <Card key={chapter.id}>
+            <Card key={chapter.id} className="gap-2!">
               <Link href={`/course/${course.id}/chapter/${chapter.id}/view`}>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 hover:underline">
-                  <CardTitle className="text-xl font-medium">{chapter.title}</CardTitle>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 hover:underline">
+                  <CardTitle className="font-medium md:text-lg">{chapter.title}</CardTitle>
                   {isCompleted ? (
                     <CheckCircle className="h-6 w-6 text-green-500" />
                   ) : (
@@ -89,7 +89,7 @@ async function Course({ params }: { params: Promise<{ id: string }> }) {
               <CardContent>
                 <Accordion type="single" collapsible className="w-full">
                   <AccordionItem value={chapter.title}>
-                    <AccordionTrigger>Lessons ({chapter.blocks.length})</AccordionTrigger>
+                    <AccordionTrigger className="pb-0">Lessons ({chapter.blocks.length})</AccordionTrigger>
                     {chapter.blocks.map((block) => (
                       <AccordionContent key={block.id}>{block.content}</AccordionContent>
                     ))}
