@@ -52,10 +52,10 @@ export const CourseBanner = ({ courseId, bannerUrl, isCreator }: CourseBannerPro
                   toast.error(`ERROR! ${error.message}`);
                 }}
                 content={{
-                  button: () => (
+                  button: ({ isUploading }) => (
                     <div className="flex items-center gap-2 font-medium text-white">
                       <Plus className="h-4 w-4" />
-                      {isPending ? <Spinner /> : "Change Banner"}
+                      {isPending || isUploading ? <Spinner /> : "Change Banner"}
                     </div>
                   ),
                 }}
@@ -83,6 +83,9 @@ export const CourseBanner = ({ courseId, bannerUrl, isCreator }: CourseBannerPro
               }}
               onUploadError={(error: Error) => {
                 toast.error(`ERROR! ${error.message}`);
+              }}
+              content={{
+                button: ({ isUploading }) => (isPending || isUploading ? <Spinner /> : "Upload Banner"),
               }}
               appearance={{
                 button: "bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-md h-auto transition-all",

@@ -48,9 +48,9 @@ export const CourseThumbnail = ({ courseId, imageUrl, isCreator }: CourseThumbna
                   toast.error(`ERROR! ${error.message}`);
                 }}
                 content={{
-                  button: () => (
+                  button: ({ isUploading }) => (
                     <div className="flex items-center justify-center text-white">
-                      {isPending ? <Spinner /> : <Plus className="h-6 w-6" />}
+                      {isPending || isUploading ? <Spinner /> : <Plus className="h-6 w-6" />}
                     </div>
                   ),
                 }}
@@ -78,7 +78,8 @@ export const CourseThumbnail = ({ courseId, imageUrl, isCreator }: CourseThumbna
                 toast.error(`ERROR! ${error.message}`);
               }}
               content={{
-                button: () => <span className="text-xs font-medium">Upload</span>,
+                button: ({ isUploading }) =>
+                  isPending || isUploading ? <Spinner /> : <span className="text-xs font-medium">Upload</span>,
               }}
               appearance={{
                 button: "bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1 rounded-md h-auto transition-all",
