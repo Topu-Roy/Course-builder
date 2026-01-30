@@ -48,8 +48,9 @@ export const createCourseInput = object({
 
 export const updateCourseInput = object({
   courseId: string().nonempty(),
-  title: string().nonempty({ message: "Title is required" }),
-  description: string().nonempty({ message: "Description is required" }),
+  title: string().optional(),
+  description: string().optional(),
+  bannerUrl: string().optional(),
 });
 
 export const getCourseInput = object({

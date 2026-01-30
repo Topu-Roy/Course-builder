@@ -7,6 +7,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { CourseBanner } from "@/components/course-banner";
 import { Navbar } from "@/components/navbar";
 
 export default async function CoursePage(props: PageProps<"/course/[id]">) {
@@ -30,6 +31,7 @@ async function Course({ params }: { params: Promise<{ id: string }> }) {
 
   return (
     <div className="container mx-auto max-w-4xl px-4 py-10 lg:px-2 2xl:px-0">
+      <CourseBanner courseId={course.id} bannerUrl={course.bannerUrl} isCreator={isCreator} />
       <div className="mb-8 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
           <h1 className="mb-4 text-2xl font-bold md:text-4xl">{course.title}</h1>
