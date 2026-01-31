@@ -27,7 +27,12 @@ async function AsyncNavbar() {
         <MobileNav user={session?.user} />
       </div>
 
-      <div className="ml-auto hidden items-center gap-x-2 md:flex">
+      <div className="ml-auto hidden items-center gap-x-3 md:flex">
+        <Link href="/explore">
+          <Button variant="ghost" size="sm">
+            Explore
+          </Button>
+        </Link>
         <Link href="/create">
           <Button variant="outline" size="sm">
             Create Course
@@ -55,7 +60,12 @@ function NavbarSkeleton() {
         <h1 className="text-foreground text-xl font-bold">Course Builder</h1>
       </Link>
 
-      <div className="ml-auto flex items-center gap-x-2">
+      <div className="ml-auto flex items-center gap-x-3">
+        <Link href="/explore">
+          <Button variant="ghost" size="sm">
+            Explore
+          </Button>
+        </Link>
         <Link href="/create">
           <Button variant="ghost" size="sm">
             Create Course

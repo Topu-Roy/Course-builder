@@ -1,5 +1,5 @@
 import { api } from "@/trpc/server";
-import { ChevronsUpDown, GraduationCap, Home, Search } from "lucide-react";
+import { ChevronsUpDown, Compass, GraduationCap, Home, Search } from "lucide-react";
 import Link from "next/link";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -57,6 +57,14 @@ export async function CourseSidebar({ params }: Props) {
                   <span className="truncate font-semibold">{data.title}</span>
                   <span className="truncate text-xs">Course Overview</span>
                 </div>
+              </Link>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+          <SidebarMenuItem>
+            <SidebarMenuButton asChild>
+              <Link href="/explore">
+                <Compass className="size-4" />
+                <span>Explore Courses</span>
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
@@ -128,9 +136,16 @@ export async function CourseSidebar({ params }: Props) {
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem asChild>
+                  <Link href="/explore">
+                    <Compass className="mr-2 h-4 w-4" />
+                    Explore Courses
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem asChild>
                   <Link href="/">
                     <Home className="mr-2 h-4 w-4" />
-                    Home
+                    Landing Page
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
