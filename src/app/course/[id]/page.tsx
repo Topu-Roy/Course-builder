@@ -32,7 +32,7 @@ async function Course({ params }: { params: Promise<{ id: string }> }) {
   const { course, isCreator } = data;
 
   return (
-    <div className="container mx-auto max-w-4xl px-4 py-10 lg:px-2 2xl:px-0">
+    <div className="container mx-auto max-w-5xl px-4 py-12 sm:px-6 lg:px-8">
       <CourseBanner courseId={course.id} bannerUrl={course.bannerUrl} isCreator={isCreator} />
 
       <div className="mb-8 flex flex-col gap-6 md:flex-row md:items-start">
@@ -113,7 +113,7 @@ async function Course({ params }: { params: Promise<{ id: string }> }) {
 
 function CourseSkeleton() {
   return (
-    <div className="container mx-auto max-w-4xl px-4 py-10 lg:px-2 2xl:px-0">
+    <div className="container mx-auto max-w-5xl px-4 py-12 sm:px-6 lg:px-8">
       {/* Course Banner Skeleton */}
       <Skeleton className="mb-8 aspect-[2.5/1] w-full rounded-xl md:aspect-4/1" />
 
