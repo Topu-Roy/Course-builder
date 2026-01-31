@@ -89,7 +89,7 @@ export default function LandingPage() {
               <div className="bg-background relative z-10 overflow-hidden rounded-4xl border shadow-2xl transition-transform duration-500 hover:scale-[1.01]">
                 <Image
                   src={HeroImage}
-                  alt="AI Course Builder Illustration"
+                  alt="StudyZap Illustration"
                   className="h-auto w-full object-cover"
                   priority
                 />
@@ -231,15 +231,17 @@ export default function LandingPage() {
         <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col items-center justify-between gap-10 text-center md:flex-row md:text-left">
             <div className="flex flex-col items-center gap-4 md:items-start">
-              <div className="flex items-center gap-2">
-                <div className="bg-primary text-primary-foreground flex h-10 w-10 items-center justify-center rounded-xl font-bold">
-                  CB
-                </div>
-                <span className="font-heading text-xl font-bold tracking-tight sm:text-2xl">Course Builder</span>
+              <div className="flex items-center gap-3">
+                <Image
+                  src="/assets/logo.png"
+                  alt="StudyZap Logo"
+                  width={40}
+                  height={40}
+                  className="rounded-xl shadow-lg"
+                />
+                <span className="font-heading text-xl font-bold tracking-tight sm:text-2xl">StudyZap</span>
               </div>
-              <p className="text-muted-foreground text-xs sm:text-sm">
-                ©2026 Course Builder AI. All rights reserved.
-              </p>
+              <p className="text-muted-foreground text-xs sm:text-sm">©2026 StudyZap AI. All rights reserved.</p>
             </div>
 
             <div className="flex flex-wrap justify-center gap-8 text-sm font-medium sm:gap-12">

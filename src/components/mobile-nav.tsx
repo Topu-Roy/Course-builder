@@ -12,6 +12,7 @@ import {
   Sparkles,
   type LucideIcon,
 } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -79,10 +80,14 @@ export function MobileNav({ user }: MobileNavProps) {
         <SheetHeader className="mb-8">
           <SheetTitle className="text-left">
             <div className="flex items-center gap-3">
-              <div className="bg-primary text-primary-foreground flex h-10 w-10 items-center justify-center rounded-xl font-bold shadow-lg">
-                CB
-              </div>
-              <span className="text-xl font-bold tracking-tight">Course Builder</span>
+              <Image
+                src="/assets/logo.png"
+                alt="StudyZap Logo"
+                width={40}
+                height={40}
+                className="rounded-xl shadow-lg"
+              />
+              <span className="text-xl font-bold tracking-tight">StudyZap</span>
             </div>
           </SheetTitle>
         </SheetHeader>

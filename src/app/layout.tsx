@@ -15,8 +15,8 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: "Course Builder | Create and Manage Online Courses",
-    template: "%s | Course Builder",
+    default: "StudyZap | Create and Manage Online Courses",
+    template: "%s | StudyZap",
   },
   description:
     "A professional platform for building, managing, and taking online courses. Empowering creators and learners worldwide.",
@@ -24,19 +24,19 @@ export const metadata: Metadata = {
     "online courses",
     "learning management system",
     "education",
-    "course builder",
+    "studyzap",
     "nextjs",
     "trpc",
     "tailwind",
   ],
-  authors: [{ name: "Course Builder Team" }],
-  creator: "Course Builder Team",
+  authors: [{ name: "StudyZap Team" }],
+  creator: "StudyZap Team",
   openGraph: {
     type: "website",
     locale: "en_US",
-    url: "https://course-builder.example.com", // Replace with actual production URL
-    siteName: "Course Builder",
-    title: "Course Builder | Create and Manage Online Courses",
+    url: "https://studyzap.example.com", // Replace with actual production URL
+    siteName: "StudyZap",
+    title: "StudyZap | Create and Manage Online Courses",
     description:
       "A professional platform for building, managing, and taking online courses. Empowering creators and learners worldwide.",
     images: [
@@ -44,16 +44,16 @@ export const metadata: Metadata = {
         url: "/og-image.png", // Ensure this image exists in public folder
         width: 1200,
         height: 630,
-        alt: "Course Builder",
+        alt: "StudyZap",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Course Builder | Create and Manage Online Courses",
+    title: "StudyZap | Create and Manage Online Courses",
     description: "A professional platform for building, managing, and taking online courses.",
     images: ["/og-image.png"],
-    creator: "@coursebuilder",
+    creator: "@studyzap",
   },
   robots: {
     index: true,

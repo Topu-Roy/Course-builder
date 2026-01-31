@@ -1,4 +1,5 @@
 import { Suspense } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -20,8 +21,15 @@ async function AsyncNavbar() {
   return (
     <div className="bg-background/80 sticky top-0 z-50 w-full border-b backdrop-blur-md">
       <div className="mx-auto flex h-16 max-w-7xl items-center px-4 sm:px-6 lg:px-8">
-        <Link href="/" className="flex items-center gap-x-2 transition-opacity hover:opacity-75">
-          <h1 className="font-heading text-xl font-bold">Course Builder</h1>
+        <Link href="/" className="flex items-center gap-x-3 transition-opacity hover:opacity-75">
+          <Image
+            src="/assets/logo.png"
+            alt="StudyZap Logo"
+            width={32}
+            height={32}
+            className="rounded-lg shadow-md"
+          />
+          <h1 className="font-heading text-xl font-bold">StudyZap</h1>
         </Link>
 
         <div className="ml-auto md:hidden">
@@ -59,8 +67,15 @@ function NavbarSkeleton() {
   return (
     <div className="bg-background sticky top-0 z-50 w-full border-b">
       <div className="mx-auto flex h-16 max-w-7xl items-center px-4 sm:px-6 lg:px-8">
-        <Link href="/" className="flex items-center gap-x-2 transition-opacity hover:opacity-75">
-          <h1 className="text-xl font-bold">Course Builder</h1>
+        <Link href="/" className="flex items-center gap-x-3 transition-opacity hover:opacity-75">
+          <Image
+            src="/assets/logo.png"
+            alt="StudyZap Logo"
+            width={32}
+            height={32}
+            className="rounded-lg shadow-md"
+          />
+          <h1 className="text-xl font-bold">StudyZap</h1>
         </Link>
 
         <div className="ml-auto flex items-center gap-x-3">
