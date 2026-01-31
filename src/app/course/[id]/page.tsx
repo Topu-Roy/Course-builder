@@ -10,6 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { CourseBanner } from "@/components/course-banner";
 import { CourseThumbnail } from "@/components/course-thumbnail";
+import { EnrollButton } from "@/components/enroll-button";
 import { Navbar } from "@/components/navbar";
 
 export default async function CoursePage(props: PageProps<"/course/[id]">) {
@@ -29,7 +30,7 @@ async function Course({ params }: { params: Promise<{ id: string }> }) {
   const data = await api.course.getCourseChapters({ courseId: id });
   if (!data.course) notFound();
 
-  const { course, isCreator } = data;
+  const { course, isCreator, isEnrolled } = data;
 
   return (
     <div className="container mx-auto max-w-5xl px-4 py-12 sm:px-6 lg:px-8">
@@ -46,13 +47,20 @@ async function Course({ params }: { params: Promise<{ id: string }> }) {
               <h1 className="mb-2 text-2xl font-bold md:text-3xl lg:text-4xl">{course.title}</h1>
               <p className="text-muted-foreground line-clamp-2 text-sm md:text-base">{course.description}</p>
             </div>
-            {isCreator && (
-              <Link href={`/course/${course.id}/edit`} className="mx-auto shrink-0 md:mx-0">
-                <Button variant="outline" size="sm" className="w-full md:w-auto">
-                  Edit Course
-                </Button>
-              </Link>
-            )}
+            <div className="flex shrink-0 flex-col gap-2 sm:flex-row md:flex-col lg:flex-row">
+              {isCreator && (
+                <Link href={`/course/${course.id}/edit`} className="mx-auto shrink-0 md:mx-0">
+                  <Button variant="outline" size="sm" className="h-11 w-full px-8 font-bold sm:h-12 md:w-auto">
+                    Edit Course
+                  </Button>
+                </Link>
+              )}
+              {!isEnrolled && !isCreator && (
+                <div className="w-full sm:w-[200px]">
+                  <EnrollButton courseId={course.id} />
+                </div>
+              )}
+            </div>
           </div>
 
           <div className="mt-6 flex flex-wrap items-center justify-center gap-4 border-t pt-4 md:justify-start">
@@ -81,30 +89,49 @@ async function Course({ params }: { params: Promise<{ id: string }> }) {
         {course.chapters.map((chapter) => {
           const isCompleted = chapter.userProgress.some((p) => p.completed && p.chapter.id === chapter.id);
 
-          return (
-            <Card key={chapter.id} className="gap-2!">
-              <Link href={`/course/${course.id}/chapter/${chapter.id}/view`}>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 hover:underline">
-                  <CardTitle className="font-medium md:text-lg">{chapter.title}</CardTitle>
-                  {isCompleted ? (
+          const content = (
+            <Card className="gap-2!">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="font-medium md:text-lg">{chapter.title}</CardTitle>
+                {isEnrolled || isCreator ? (
+                  isCompleted ? (
                     <CheckCircle className="h-6 w-6 text-green-500" />
                   ) : (
                     <Circle className="text-muted-foreground h-6 w-6" />
-                  )}
-                </CardHeader>
-              </Link>
+                  )
+                ) : null}
+              </CardHeader>
               <CardContent>
                 <Accordion type="single" collapsible className="w-full">
-                  <AccordionItem value={chapter.title}>
-                    <AccordionTrigger className="pb-0">Lessons ({chapter.blocks.length})</AccordionTrigger>
-                    {chapter.blocks.map((block) => (
-                      <AccordionContent key={block.id}>{block.content}</AccordionContent>
-                    ))}
+                  <AccordionItem value={chapter.title} className="border-none">
+                    <AccordionTrigger className="pt-2 pb-0 text-sm hover:no-underline">
+                      Lessons ({chapter.blocks.length})
+                    </AccordionTrigger>
+                    <AccordionContent className="pt-4">
+                      <div className="space-y-3 pl-2">
+                        {chapter.blocks.map((block) => (
+                          <div key={block.id} className="text-muted-foreground flex items-center gap-2 text-sm">
+                            <div className="bg-muted-foreground/20 h-1 w-1 rounded-full" />
+                            {block.content}
+                          </div>
+                        ))}
+                      </div>
+                    </AccordionContent>
                   </AccordionItem>
                 </Accordion>
               </CardContent>
             </Card>
           );
+
+          if (isEnrolled || isCreator) {
+            return (
+              <Link key={chapter.id} href={`/course/${course.id}/chapter/${chapter.id}/view`}>
+                {content}
+              </Link>
+            );
+          }
+
+          return <div key={chapter.id}>{content}</div>;
         })}
       </div>
     </div>

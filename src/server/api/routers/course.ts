@@ -485,13 +485,8 @@ export const courseRouter = createTRPCRouter({
       },
     });
 
-    const isEnrolled = enrollment?.id;
-
-    if (!isCreator && !isEnrolled) {
-      throw new TRPCError({ code: "FORBIDDEN", message: "You must be enrolled to view this course." });
-    }
-
-    return { course, isCreator };
+    const isEnrolled = !!enrollment?.id;
+    return { course, isCreator, isEnrolled };
   }),
 
   getChapter: protectedProcedure.input(getChapterInput).query(async ({ ctx, input }) => {
