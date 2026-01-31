@@ -5,6 +5,27 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Navbar } from "@/components/navbar";
 
+const steps = [
+  {
+    step: "01",
+    title: "Enter your Topic",
+    description:
+      "Type in any topic you're interested in. Be as specific as you like, from 'Quantum Physics' to 'Vegan Sourdough Baking'.",
+  },
+  {
+    step: "02",
+    title: "AI Crafts the Course",
+    description:
+      "Our AI engine designs a comprehensive curriculum and hunts for the best educational videos on YouTube.",
+  },
+  {
+    step: "03",
+    title: "Start Learning",
+    description:
+      "Enroll in your new course and start learning immediately with a structured, interactive syllabus.",
+  },
+];
+
 export default function LandingPage() {
   return (
     <div className="flex min-h-screen flex-col">
@@ -158,28 +179,9 @@ export default function LandingPage() {
           </div>
 
           <div className="flex flex-col gap-10 lg:flex-row lg:gap-8">
-            {[
-              {
-                step: "01",
-                title: "Enter your Topic",
-                description:
-                  "Type in any topic you're interested in. Be as specific as you like, from 'Quantum Physics' to 'Vegan Sourdough Baking'.",
-              },
-              {
-                step: "02",
-                title: "AI Crafts the Course",
-                description:
-                  "Our AI engine designs a comprehensive curriculum and hunts for the best educational videos on YouTube.",
-              },
-              {
-                step: "03",
-                title: "Start Learning",
-                description:
-                  "Enroll in your new course and start learning immediately with a structured, interactive syllabus.",
-              },
-            ].map((step, idx) => (
+            {steps.map((step, idx) => (
               <div key={idx} className="relative flex-1 px-4 text-center">
-                <div className="mb-4 text-5xl leading-none font-black text-slate-100 sm:mb-8 sm:text-7xl dark:text-slate-800/50">
+                <div className="text-accent mb-4 text-5xl leading-none font-black sm:mb-8 sm:text-7xl">
                   {step.step}
                 </div>
                 <h3 className="mb-2 text-xl font-bold sm:mb-4 sm:text-2xl">{step.title}</h3>
