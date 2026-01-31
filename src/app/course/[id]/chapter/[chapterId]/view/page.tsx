@@ -19,6 +19,7 @@ import { ContentBlockRenderer } from "@/components/content-block-renderer";
 import { ToggleCompletionButton } from "@/components/toggle-completion-button";
 import { UserAvatar } from "@/components/user-avatar";
 import { getServerSession } from "@/lib/auth";
+import { tryCatch } from "@/lib/try-catch";
 import { type ContentBlock } from "@/lib/types";
 
 export default function Page({ params }: PageProps<"/course/[id]/chapter/[chapterId]/view">) {
@@ -41,11 +42,17 @@ async function Chapter({
 }) {
   const { id, chapterId } = await params;
 
-  const [session, chapter, sidebarData] = await Promise.all([
-    getServerSession(),
-    api.course.getChapter({ chapterId, courseId: id }),
-    api.course.getSidebarData({ courseId: id }),
-  ]);
+  const { data, error } = await tryCatch(
+    Promise.all([
+      getServerSession(),
+      api.course.getChapter({ chapterId, courseId: id }),
+      api.course.getSidebarData({ courseId: id }),
+    ])
+  );
+
+  if (error || !data) notFound();
+
+  const [session, chapter, sidebarData] = data;
 
   if (!session) redirect("/auth/sign-in");
   if (!chapter) notFound();

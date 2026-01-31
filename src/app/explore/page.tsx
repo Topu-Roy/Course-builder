@@ -3,12 +3,14 @@ import { type CourseCategory } from "@/generated/prisma/client";
 import { api } from "@/trpc/server";
 import { PlusCircle } from "lucide-react";
 import Link from "next/link";
+import { notFound } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { CourseCard } from "@/components/course-card";
 import { CourseFilter } from "@/components/course-filter";
 import { Navbar } from "@/components/navbar";
+import { tryCatch } from "@/lib/try-catch";
 
 export default async function ExplorePage({
   searchParams,
@@ -54,9 +56,13 @@ async function CourseCards({
 }) {
   const { category } = await searchParams;
 
-  const courses = await api.course.getAll({
-    category: category as CourseCategory | undefined,
-  });
+  const { data: courses, error } = await tryCatch(
+    api.course.getAll({
+      category: category as CourseCategory | undefined,
+    })
+  );
+
+  if (error) notFound();
 
   return (
     <>

@@ -12,6 +12,7 @@ import { CourseBanner } from "@/components/course-banner";
 import { CourseThumbnail } from "@/components/course-thumbnail";
 import { EnrollButton } from "@/components/enroll-button";
 import { Navbar } from "@/components/navbar";
+import { tryCatch } from "@/lib/try-catch";
 
 export default async function CoursePage(props: PageProps<"/course/[id]">) {
   return (
@@ -27,8 +28,8 @@ export default async function CoursePage(props: PageProps<"/course/[id]">) {
 async function Course({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
 
-  const data = await api.course.getCourseChapters({ courseId: id });
-  if (!data.course) notFound();
+  const { data, error } = await tryCatch(api.course.getCourseChapters({ courseId: id }));
+  if (error || !data.course) notFound();
 
   const { course, isCreator, isEnrolled } = data;
 

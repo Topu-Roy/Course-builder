@@ -2,11 +2,13 @@ import { Suspense } from "react";
 import { api } from "@/trpc/server";
 import { Compass, PlusCircle } from "lucide-react";
 import Link from "next/link";
+import { notFound } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { CourseCard } from "@/components/course-card";
 import { Navbar } from "@/components/navbar";
+import { tryCatch } from "@/lib/try-catch";
 
 export default function EnrolledCoursesPage() {
   return (
@@ -38,7 +40,9 @@ export default function EnrolledCoursesPage() {
 }
 
 async function EnrolledCourseCards() {
-  const courses = await api.course.getEnrolledCourses();
+  const { data: courses, error } = await tryCatch(api.course.getEnrolledCourses());
+
+  if (error) notFound();
 
   return (
     <>

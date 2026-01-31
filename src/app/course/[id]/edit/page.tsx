@@ -7,6 +7,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { ChaptersList } from "@/components/chapters-list";
 import { CourseEditor } from "@/components/course-editor";
 import { Navbar } from "@/components/navbar";
+import { tryCatch } from "@/lib/try-catch";
 
 export default async function CourseEditPage({ params }: PageProps<"/course/[id]/edit">) {
   return (
@@ -28,8 +29,8 @@ async function CourseEdit({
 }) {
   const { id } = await params;
 
-  const course = await api.course.get({ courseId: id });
-  if (!course) notFound();
+  const { data: course, error } = await tryCatch(api.course.get({ courseId: id }));
+  if (error || !course) notFound();
 
   return (
     <div className="container mx-auto max-w-4xl px-4 py-10 lg:px-2 2xl:px-0">

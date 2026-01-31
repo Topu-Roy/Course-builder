@@ -6,6 +6,7 @@ import { notFound } from "next/navigation";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ChapterContentEditor } from "@/components/chapter-content-editor";
 import { Navbar } from "@/components/navbar";
+import { tryCatch } from "@/lib/try-catch";
 import { type ContentBlock } from "@/lib/types";
 
 export default async function ChapterEditPage({ params }: PageProps<"/course/[id]/chapter/[chapterId]/edit">) {
@@ -29,10 +30,9 @@ async function ChapterEdit({
 }) {
   const { id, chapterId } = await params;
 
-  const chapter = await api.course.getChapter({ courseId: id, chapterId });
+  const { data: chapter, error } = await tryCatch(api.course.getChapter({ courseId: id, chapterId }));
 
-  if (chapter?.courseId !== id) notFound();
-  if (!chapter) notFound();
+  if (error || chapter?.courseId !== id) notFound();
 
   // Transform blocks to ContentBlock format for the editor
   const contentBlocks: ContentBlock[] = chapter.blocks.map((block) => ({
