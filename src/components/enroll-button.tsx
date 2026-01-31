@@ -24,14 +24,18 @@ export function EnrollButton({ courseId }: { courseId: string }) {
   };
 
   return (
-    <Button className="w-full" onClick={handleEnroll} disabled={isPending}>
+    <Button
+      className="h-11 w-full rounded-xl font-bold shadow-sm transition-all active:scale-[0.98] sm:h-12"
+      onClick={handleEnroll}
+      disabled={isPending}
+    >
       {isPending ? (
-        <>
-          <Spinner />
-          Enrolling...
-        </>
+        <div className="flex items-center gap-2">
+          <Spinner className="h-4 w-4" />
+          <span>Enrolling...</span>
+        </div>
       ) : (
-        "Enroll"
+        "Enroll Now"
       )}
     </Button>
   );

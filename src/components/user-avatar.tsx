@@ -11,11 +11,11 @@ import {
 import { SignOutButton } from "./auth-buttons";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 
-export function UserAvatar({ user }: { user: User }) {
+export function UserAvatar({ user, className }: { user: User; className?: string }) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger>
-        <Avatar>
+        <Avatar className={className}>
           <AvatarFallback>CS</AvatarFallback>
           <AvatarImage src={user.image ?? ""} />
         </Avatar>

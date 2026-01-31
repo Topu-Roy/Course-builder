@@ -16,11 +16,11 @@ export const CourseFilter = () => {
     } else {
       params.set("category", value);
     }
-    router.push(`/?${params.toString()}`);
+    router.push(`/explore?${params.toString()}`);
   };
 
   return (
-    <div className="w-[200px]">
+    <div className="w-full sm:w-[200px]">
       <Select value={currentCategory} onValueChange={onSelectChange}>
         <SelectTrigger>
           <SelectValue placeholder="Filter by category" />

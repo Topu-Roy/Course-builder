@@ -1,95 +1,149 @@
 "use client";
 
 import { type User } from "better-auth";
-import { BookOpen, Compass, GraduationCap, Home, LogIn, Menu, PlusCircle } from "lucide-react";
+import {
+  BookOpen,
+  Compass,
+  GraduationCap,
+  Home,
+  LogIn,
+  Menu,
+  PlusCircle,
+  Sparkles,
+  type LucideIcon,
+} from "lucide-react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { SignOutButton } from "@/components/auth-buttons";
 import { UserAvatar } from "@/components/user-avatar";
+import { cn } from "@/lib/utils";
 
 type MobileNavProps = {
   user?: User;
 };
 
+type Route = {
+  label: string;
+  icon: LucideIcon;
+  href: Parameters<typeof Link>[0]["href"];
+  protected?: boolean;
+  premium?: boolean;
+};
+
 export function MobileNav({ user }: MobileNavProps) {
+  const pathname = usePathname();
+
+  const routes: Route[] = [
+    {
+      label: "Home",
+      icon: Home,
+      href: "/" satisfies Parameters<typeof Link>[0]["href"],
+    },
+    {
+      label: "Explore",
+      icon: Compass,
+      href: "/explore" satisfies Parameters<typeof Link>[0]["href"],
+    },
+    {
+      label: "My Created",
+      icon: BookOpen,
+      href: "/created",
+      protected: true,
+    },
+    {
+      label: "My Enrolled",
+      icon: GraduationCap,
+      href: "/enrolled",
+      protected: true,
+    },
+    {
+      label: "Create",
+      icon: PlusCircle,
+      href: "/create",
+      premium: true,
+    },
+  ];
+
   return (
     <Sheet>
       <SheetTrigger asChild>
-        <Button variant="ghost" size="icon" className="md:hidden">
-          <Menu className="h-5 w-5" />
+        <Button variant="ghost" size="icon" className="transition-colors hover:bg-slate-100 md:hidden">
+          <Menu className="h-6 w-6" />
           <span className="sr-only">Toggle menu</span>
         </Button>
       </SheetTrigger>
-      <SheetContent side="right" className="w-[300px] sm:w-[400px]">
-        <SheetHeader>
-          <SheetTitle className="flex items-center gap-2 pl-2 text-left">
-            <span className="font-bold">Course Builder</span>
+      <SheetContent side="right" className="flex w-[85%] flex-col p-6 sm:w-[400px]">
+        <SheetHeader className="mb-8">
+          <SheetTitle className="text-left">
+            <div className="flex items-center gap-3">
+              <div className="bg-primary text-primary-foreground flex h-10 w-10 items-center justify-center rounded-xl font-bold shadow-lg">
+                CB
+              </div>
+              <span className="text-xl font-bold tracking-tight">Course Builder</span>
+            </div>
           </SheetTitle>
         </SheetHeader>
-        <div className="mt-8 flex flex-col gap-6">
-          {/* User Profile Section if Logged In */}
+
+        <div className="flex flex-1 flex-col gap-8">
           {user && (
-            <div className="flex items-center gap-4 px-2">
-              <UserAvatar user={user} />
-              <div className="flex flex-col">
-                <span className="text-sm font-medium">{user.name}</span>
-                <span className="text-muted-foreground text-xs">{user.email}</span>
+            <div className="flex flex-col gap-4">
+              <h2 className="text-muted-foreground px-2 text-xs font-bold tracking-widest uppercase">Account</h2>
+              <div className="flex items-center gap-4 rounded-2xl bg-slate-50 p-4 dark:bg-slate-900/50">
+                <UserAvatar user={user} className="border-primary/10 h-12 w-12 border-2" />
+                <div className="flex flex-col overflow-hidden">
+                  <span className="truncate text-base font-bold">{user.name}</span>
+                  <span className="text-muted-foreground truncate text-xs">{user.email}</span>
+                </div>
               </div>
             </div>
           )}
 
-          {user && <Separator />}
+          <div className="flex flex-col gap-4">
+            <h2 className="text-muted-foreground px-2 text-xs font-bold tracking-widest uppercase">Navigation</h2>
+            <nav className="flex flex-col gap-1.5">
+              {routes.map((route) => {
+                if (route.protected && !user) return null;
+                const isActive = pathname === route.href;
 
-          <nav className="flex flex-col gap-3">
-            <Link href="/">
-              <Button variant="ghost" className="w-full justify-start text-base">
-                <Home className="mr-3 h-5 w-5" />
-                Home
-              </Button>
-            </Link>
-            <Link href="/explore">
-              <Button variant="ghost" className="w-full justify-start text-base">
-                <Compass className="mr-3 h-5 w-5" />
-                Explore
-              </Button>
-            </Link>
-            {user && (
-              <>
-                <Link href={"/created"}>
-                  <Button variant="ghost" className="w-full justify-start text-base">
-                    <BookOpen className="mr-3 h-5 w-5" />
-                    Created Courses
-                  </Button>
-                </Link>
-                <Link href={"/enrolled"}>
-                  <Button variant="ghost" className="w-full justify-start text-base">
-                    <GraduationCap className="mr-3 h-5 w-5" />
-                    Enrolled Courses
-                  </Button>
-                </Link>
-              </>
-            )}
-            <Link href="/create">
-              <Button variant="ghost" className="w-full justify-start text-base">
-                <PlusCircle className="mr-3 h-5 w-5" />
-                Create Course
-              </Button>
-            </Link>
-          </nav>
+                return (
+                  <Link
+                    key={`${`${typeof route.href === "string" ? route.href : route.href.pathname}-${route.label}`}-${route.label}`}
+                    href={route.href}
+                  >
+                    <Button
+                      variant="ghost"
+                      className={cn(
+                        "h-12 w-full justify-start rounded-xl px-4 transition-all",
+                        isActive
+                          ? "bg-primary/10 text-primary hover:bg-primary/20 font-bold"
+                          : "text-muted-foreground hover:text-foreground hover:bg-slate-50",
+                        route.premium && "text-purple-600 hover:bg-purple-50 hover:text-purple-700"
+                      )}
+                    >
+                      <route.icon
+                        className={cn("mr-3 h-5 w-5", route.premium && !isActive && "text-purple-500")}
+                      />
+                      {route.label}
+                      {route.premium && <Sparkles className="ml-auto h-3 w-3 text-purple-400" />}
+                    </Button>
+                  </Link>
+                );
+              })}
+            </nav>
+          </div>
 
-          <Separator />
-
-          {/* Auth Actions */}
-          <div className="mt-auto">
+          <div className="mt-auto flex flex-col gap-4 pt-6">
+            <Separator />
             {user ? (
               <div className="px-2">
                 <SignOutButton as="button" />
               </div>
             ) : (
               <Link href="/auth/sign-in">
-                <Button className="w-full justify-start" variant="default">
+                <Button className="h-12 w-full rounded-xl font-bold shadow-md" variant="default">
                   <LogIn className="mr-3 h-5 w-5" />
                   Sign In
                 </Button>
