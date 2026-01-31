@@ -3,13 +3,17 @@ import { redirect } from "next/navigation";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { SignInWithGithubButton } from "@/components/auth-buttons";
+import { Navbar } from "@/components/navbar";
 import { getServerSession } from "@/lib/auth";
 
 export default function Page() {
   return (
-    <Suspense fallback={<SignInSkeleton />}>
-      <SignIn />
-    </Suspense>
+    <>
+      <Navbar />
+      <Suspense fallback={<SignInSkeleton />}>
+        <SignIn />
+      </Suspense>
+    </>
   );
 }
 

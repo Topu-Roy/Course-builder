@@ -67,7 +67,7 @@ export function SignOutButton({ as }: { as: "button" | "menu-item" }) {
           {isPending ? <Spinner /> : "Sign Out"}
         </DropdownMenuItem>
       ) : (
-        <Button onClick={handleClick} disabled={isPending}>
+        <Button onClick={handleClick} disabled={isPending} className="w-full">
           {isPending ? <Spinner /> : "Sign Out"}
         </Button>
       )}
